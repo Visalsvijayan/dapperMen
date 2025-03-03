@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        body {
+             
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+            overflow-y: hidden;
+            
+        }
+        h1 {
+            font-size: 4em;
+            margin: 0;
+            color: #e74c3c;
+        }
+        p {
+            font-size: 1.5em;
+        }
+        a {
+            color: #080909;
+            text-decoration: none;
+        }
+        button:hover {
+            background-color: #a3a8b1;
+            color: #f4f4f4;
+        }
+        button{
+            padding: 10px;
+            cursor: pointer;
+            background-color: rgb(83, 168, 201);
+        }
+        button:active{
+            background-color: #3b69aa;
+        }
+        .container{
+            display: flex; /* Enables flexbox */
+            flex-direction: column; /* Stacks elements vertically */
+            justify-content: center; /* Centers vertically */
+            align-items: center; /* Centers horizontally */
+            height: 100vh; /* Full height of the viewport */
+        }
+    </style>
+</head>
+<body>
+   <div class="container">
+        <h1>404</h1>
+        <p>Oops! The page you're looking for doesn't exist.</p>
+        <p>You can go back to the home page.</p>
+        <button onclick="gohome()">homepage</button>
+   </div> 
+
+   <script>
+        function gohome(){
+            window.location.href="/"
+        }
+   </script>
+    
+</body>
+</html>
