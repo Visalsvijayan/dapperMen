@@ -1,0 +1,147 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+    
+</style>
+<main class="main">
+    <div class="page-header breadcrumb-wrap" style="padding: 20px; background: #f5f5f5;">
+        <div class="container">
+            <div class="breadcrumb" style="font-size: 14px;">
+                <a href="#" rel="nofollow" style="text-decoration: none; color: #333;">Home</a>
+                <span style="margin: 0 5px;">></span> Fashion
+                <span style="margin: 0 5px;">></span> Product Detail Page
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50" style="margin: 50px 0;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9">
+                    <div class="product-detail accordion-detail">
+                        <div class="row mb-50">
+                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                <div class="detail-gallery" style="text-align: center;">
+                                    <span class="zoom-icon" style="font-size: 24px;"><i class="fi-rs-search"></i></span>
+                                    <div class="product-image-slider">
+                                        <figure class="border-radius-10" style="margin: 10px;">
+                                            <img id="main-img" src="/uploads/product-images/<%=product.productImage[0]%>" alt="product image" style="width: 100%; border-radius: 10px;">
+                                        </figure>
+                                         
+
+                                    </div>
+                                     
+                                    <div class="slider-nav-thumbnails pl-20 pr-20" style="display: flex; overflow-x: auto;">
+                                        <% for(let i = 0; i < product.productImage.length; i++) { %>
+                                            <div style="flex: 0 0 auto; width: 50px; height: 50px; margin-right: 10px; border: 1px solid #ddd; overflow: hidden;"onclick="changeMainImage('<%= product.productImage[i] %>')">
+                                                <img src="/uploads/product-images/<%= product.productImage[i] %>" alt="product image" style="width: 100%; height: 100%; object-fit: contain;">
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                <div class="detail-info" style="padding: 20px;">
+                                    <h2 class="title-detail" style="font-size: 24px; margin-bottom: 10px;"><%=product.productName%></h2>
+                                    <div class="product-detail-rating" style="margin-bottom: 20px;">
+                                        <div class="pro-details-brand" style="font-size: 16px;">
+                                            <span> Brands: <a href="#" style="text-decoration: none; color: #333;"><%=product.brand%></a></span>
+                                        </div>
+                                        <div class="product-rate-cover text-end" style="font-size: 14px;">
+                                            <div class="product-rate d-inline-block">
+                                                <div class="product-rating" style="width:90%"></div>
+                                            </div>
+                                            <span class="font-small ml-5 text-muted"> (25 reviews)</span>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix product-price-cover" style="margin-bottom: 20px;">
+                                        <div class="product-price primary-color float-left" style="font-size: 18px;">
+                                            <ins><span class="text-brand" style="color: #333;"><%=product.salePrice%></span></ins>
+                                            <ins><span class="old-price font-md ml-15" style="text-decoration: line-through; color: #999;"><%=product.regularPrice%></span></ins>
+                                            <span class="save-price font-md color3 ml-15" style="color: green;"> 
+                                                <%if(!totalOffer){%>
+                                                    No offer
+                                                 
+                                                <%}else{%>   
+                                                    <%=totalOffer%> % offer
+                                                <%}%>    
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="bt-1 border-color-1 mt-15 mb-15" style="border-top: 1px solid #ddd;"></div>
+                                    <div class="short-desc mb-30" style="font-size: 16px; margin-bottom: 20px;">
+                                        <p> <%=product.description%></p>
+                                    </div>
+                                    <div class="product_sort_info font-xs mb-30" style="font-size: 14px; margin-bottom: 20px;">
+                                        <ul style="list-style: none; padding: 0;">
+                                            <li class="mb-10"><i class="fi-rs-crown mr-5"></i> 1 Year Brand Warranty</li>
+                                            <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return Policy</li>
+                                            <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bt-1 border-color-1 mt-30 mb-30" style="border-top: 1px solid #ddd;"></div>
+                                    <div class="detail-extralink" style="margin-bottom: 20px; display: flex; align-items: center;">
+                                        <div class="detail-qty border radius" style="border: 1px solid #ddd; border-radius: 5px; padding: 5px; margin-right: 10px;">
+                                            <a href="#" class="qty-down" onclick="decreaseQuantity()" style="text-decoration: none; color: #333;"><i class="fi-rs-angle-small-down"></i></a>
+                                            <input type="number" class="qty-val" id="quantity" value="1" min="1" style="width: 50px; text-align: center; border: none;">
+                                            <a href="#" class="qty-up" onclick="increaseQuantity()" style="text-decoration: none; color: #333;"><i class="fi-rs-angle-small-up"></i></a>
+                                        </div>
+                                        <div class="product-extra-link2" style="display: flex; align-items: center;">
+                                            <button type="submit" class="button button-add-to-cart" onclick="addToCart()" style="background: #333; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px;">Add to cart</button>
+                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#" style="text-decoration: none; color: #333;"><i class="fi-rs-heart"></i></a>
+                                        </div>
+                                    </div>
+                                    <ul class="product-meta font-xs color-grey mt-50" style="font-size: 14px; color: #666; list-style: none; padding: 0;">
+                                        <li class="mb-5">Stock Code: <a href="#" style="text-decoration: none; color: #333;">FWM15VKT</a></li>
+                                        <li class="mb-5">Tags: <a href="#" rel="tag" style="text-decoration: none; color: #333;"><%=category.name%></a></li>
+                                        <li>Availability: <span class="in-stock text-success ml-5" style="color: green;"><%=quantity%> Items in sto</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    // Update the main image source
+    function changeMainImage(imageSrc) {
+        
+        document.getElementById('main-img').src = `/uploads/product-images/${imageSrc}`;
+    }
+
+    function increaseQuantity() {
+        var quantityInput = document.getElementById('quantity');
+        var currentValue = parseInt(quantityInput.value);
+        quantityInput.value = currentValue + 1;
+    }
+
+    function decreaseQuantity() {
+        var quantityInput = document.getElementById('quantity');
+        var currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+            quantityInput.value = currentValue - 1;
+        }
+    }
+
+    function addToCart() {
+        var quantity = document.getElementById('quantity').value;
+        alert('Added ' + quantity + ' item(s) to cart');
+    }
+
+
+</script>
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.nice-select.min.js"></script>
+<script src="js/jquery.nicescroll.min.js"></script>
+<script src="js/jquery.magnific-popup.min.js"></script>
+<script src="js/jquery.countdown.min.js"></script>
+<script src="js/jquery.slicknav.js"></script>
+<script src="js/mixitup.min.js"></script>
+<script src="js/owl.carousel.min.js"></script>
+<script src="js/main.js"></script>
+
+
+ 

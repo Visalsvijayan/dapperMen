@@ -1,0 +1,197 @@
+<%- include ("../partials/user/header") %>
+ 
+<div class="unique-container">
+    <div class="unique-form-container">
+        <h2>Sign Up</h2>
+
+         <% if (message) { %>
+            <p style="color: green;"><%= message %></p>
+        <% } %>
+
+        
+        <form id="signform" action="/signup" method="post">
+            <div class="unique-form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" >
+                <div class="error-msg" id="error1"></div>
+            </div>
+            <div class="unique-form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" >
+                <div class="error-msg" id="error2"></div>
+            </div>
+            <div class="unique-form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone"  >
+                <div class="error-msg" id="error3"></div>
+            </div>
+            <div class="unique-form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" >
+                <div class="error-msg" id="error4"></div>
+            </div>
+            <div class="unique-form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm_password" >
+                <div class="error-msg" id="error5"></div>
+            </div>
+            <button type="submit" class="unique-btn">Sign Up</button>
+            <div class="mt-2px">
+                <p>or signup with</p>
+            </div>
+            <div class="social-btns">
+                <a href="/auth/google" type="button" class="btn btn-outline-danger">
+                    <img src="img/googlesignup.png" alt="Google Logo" style="width: 24px; height: 24px;">
+                </a>
+                
+            </div>
+        </form>
+    </div>
+    <div class="unique-image-container">
+        <img src="https://img.freepik.com/free-photo/woman-holding-shopping-bags_329181-390.jpg?t=st=1740197475~exp=1740201075~hmac=daaf0c34f79b0a24cc8d27bba05676f03408ff2f01ee24f654693b3135d3ed0b&w=740" alt="Fashion Girl">
+    </div>
+</div>
+
+
+<%- include ("../partials/user/footer") %>
+
+
+<script>
+    const nameid=document.getElementById("name");
+    const emailid=document.getElementById("email");
+    const phoneid=document.getElementById("phone");
+    const passid=document.getElementById("password");
+    const cpassid=document.getElementById("confirm-password");
+    const error1=document.getElementById("error1");
+    const error2=document.getElementById("error2");
+    const error3=document.getElementById("error3");
+    const error4=document.getElementById("error4");
+    const error5=document.getElementById("error5");
+    const signform=document.getElementById("signform")
+
+
+    document.addEventListener("DOMContentLoaded",function(){
+        signform.addEventListener("submit",function(e){
+            nameValidation();
+            emailValidation();
+            phoneValidation();
+            passwordValidation();
+
+            if(!nameid ||
+                !phoneid||
+                !emailid||
+                !passid||
+                !error1||
+                !error2||
+                !error3||
+                !error4||
+                !error5
+            ){
+                console.log("one or more elements not found");
+            }
+            if(
+                error1.innerHTML||
+                error2.innerHTML||
+                error3.innerHTML||
+                error4.innerHTML||
+                error5.innerHTML
+            ){
+                e.preventDefault();
+            }
+        })
+    })
+
+    function nameValidation(e){
+        const nameval=nameid.value;
+        const namepattern=/^[A-Za-z ]+$/
+        if(nameval.trim()===""){
+            error1.style.display="block";
+            error1.innerHTML="please enter a valid name"
+
+        }
+        else if(!namepattern.test(nameval)){
+
+            error1.style.display="block";
+            error1.innerHTML="Name can only contain alphabets and space"
+        }
+        else{
+            error1.style.display="none";
+            error1.innerHTML="";
+        }
+
+    }
+
+    function emailValidation(e){
+        const emailval=emailid.value;
+        const emailpattern=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+        if(emailval.trim()===""){
+            error2.style.display="block";
+            error2.innerHTML="please enter email"
+
+        }
+        else if(!emailpattern.test(emailval)){
+
+            error2.style.display="block";
+            error2.innerHTML="email is not valid"
+        }
+        else{
+            error2.style.display="none";
+            error2.innerHTML="";
+        }
+
+    }
+
+    function phoneValidation(e){
+        const phoneval=phoneid.value;
+         
+        if(phoneval.trim()===""){
+            error3.style.display="block";
+            error3.innerHTML="please enter phone"
+
+        }
+        else if(phoneval.length<10||phoneval.length>10){
+
+            error3.style.display="block";
+            error3.innerHTML="enter 10 digit phone number"
+        }
+        else{
+            error3.style.display="none";
+            error3.innerHTML="";
+        }
+
+
+    }
+    function passwordValidation(){
+        const passval=passid.value;
+        const cpassval=cpassid.value;
+        const regex=/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+        if(passval.trim()===""){
+            error4.style.display="block";
+            error4.innerHTML="password feild is required"
+            return
+
+        }
+        else if(!regex.test(passval)){
+
+            error4.style.display="block";
+            error4.innerHTML="password must contain at least 8 charecters , at least one Uppercase letter, one lowercase letter, one digit and one special charecter"
+            return
+        }
+        else{
+            error4.style.display="none"
+            error4.innerHTML="";
+        }
+
+        if(passval!==cpassval){
+            error5.style.display="block";
+            error5.innerHTML="password mismatch";
+
+        }
+        else{
+            error5.style.display="none";
+            error5.innerHTML="";
+
+        }
+    }
+
+</script>

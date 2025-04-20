@@ -1,0 +1,323 @@
+<%- include ("../../views/partials/admin/header") %>
+<link rel="stylesheet" href="sweetalert2.min.css">
+<style>
+    .container{
+        padding-left: 100px;
+        padding-top: 30px;
+    }
+</style>
+<div class="container">
+    <div class="category-management-container">
+        <h1>Category</h1>
+        <form action="/admin/category/" method="get">
+            <div class="category-management-search-bar">
+                <input type="text" placeholder="Search category" name="search">
+                <button type="submit">search</button>
+            </div>
+        </form>
+       
+        <div class="category-management-actions">
+            <button id="add-category-button">Add Category</button>
+        </div>
+        <table class="category-management-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Offer-Price</th>
+                    <th>Offer</th>
+                    <th>Status</th>
+                    <th>List/Unlist</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%cata.reverse().forEach((category,index)=>{%>
+                <tr>
+                    <td> <%=category.name%> </td>
+                    <td> <%=category.description%> </td>
+                    <td>
+                        <%if(category.categoryOffer){%>
+                        <%=category.categoryOffer%>
+                        <%}else{%>
+                            0%
+                            <%}%>
+                    </td>
+                    <td>
+                       <%if(category.categoryOffer===0){%>
+                            <button class="offerBtn" data-category-id="<%= category._id %>" data-action="add" style="background-color: rgb(65, 210, 65) ;color: white;" >Add Offer</button>
+                         <%}else{%>
+                            <button class="offerBtn" data-category-id="<%= category._id %>" data-action="remove" style="background-color:rgb(228, 46, 46)">Remove Offer</button>
+
+                          <%}%>   
+                    </td>
+                    <td>
+                        <%if(category.isListed){%>
+                            <span>Listed</span>
+                        <%}else{%>
+                            <span>Unlist</span>   
+                        <%}%>    
+
+                    </td>
+                    <td>
+                        <%if(category.isListed){%>
+                            <button id="listBtn" class="category-management-button"  style="background-color:rgb(65, 210, 65);">
+                                <a href="/admin/listCategory?id=<%=category._id%>" class="text-white">Unlist</a>
+                            </button>
+                        <%}else{%>
+                            <button id="unlistBtn" class="category-management-button"  style="background-color:rgb(228, 46, 46);">
+                                    <a href="/admin/unlistCategory?id=<%=category._id%>"  class="text-white">List</a>
+                            </button>
+                        <%}%>
+                    </td>
+                    <td>
+                        <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info text-white">Edit</a>
+                    </td>
+                </tr>
+
+                <%})%>
+            </tbody>
+        </table>
+    </div>
+
+    <% // pagination div %>
+    <div class="container mt-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+                <%for(let i=1;i<=totalpages;i++){%>
+                    <li class="page-item <%=(i===currentPage) ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+
+                    </li>
+                <%}%>    
+
+            </ul>
+        </nav>
+    </div>
+  
+
+    <!-- Popup Modal for Add Offer -->
+    <div id="offerModal" class="category-management-modal">
+        <div class="category-management-modal-content">
+            <span class="category-management-close">&times;</span>
+            <h2>Add Offer</h2>
+            <form id="offerForm">
+                <input type="hidden" id="categoryId" name="categoryId">
+                <label for="offerPercentage">Offer Percentage:</label>
+                <input type="number" id="offerPercentage" name="offerPercentage" min="1" max="100" >
+                <button type="submit" class="category-management-button">Submit</button>
+            </form>
+        </div>
+    </div>
+    <!-- Popup Modal for Add Category -->
+    <div id="addCategoryModal" class="add-category-modal">
+        <div class="add-category-modal-content">
+            <span class="add-category-close">&times;</span>
+            <h2>Add Category</h2>
+            <form method="post" action="/admin/addCategory" onsubmit="return addCategoryFormSubmit(event)">
+                <label for="categoryName">Name:</label>
+                <p style="color: red;"  id="name-error"></p>
+                <input type="text" id="categoryName" name="categoryName" >
+                
+                <label for="categoryDescription">Description:</label>
+                <p id="description-error" style="color: red;"></p>
+                <textarea id="categoryDescription" name="categoryDescription" rows="4" ></textarea>
+                
+                <button type="submit" class="add-category-button">Submit</button>
+            </form>
+        </div>
+    </div>
+    
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Show Add Offer Modal
+    document.querySelectorAll("#addOfferBtn").forEach(button => {
+        button.addEventListener("click", function () {
+            document.getElementById("offerModal").style.display = "block";
+        });
+    });
+
+    // Show Add Category Modal
+    document.getElementById("add-category-button").addEventListener("click", () => {
+        document.getElementById("addCategoryModal").style.display = "block";
+    });
+
+    // Close buttons for modals
+    document.querySelectorAll(".add-category-close, .category-management-close").forEach(closeBtn => {
+        closeBtn.addEventListener("click", function () {
+            this.closest(".category-management-modal, .add-category-modal").style.display = "none";
+        });
+    });
+
+    // Close modal on outside click
+    window.addEventListener("click", function (event) {
+        if (event.target.classList.contains("category-management-modal") || event.target.classList.contains("add-category-modal")) {
+            event.target.style.display = "none";
+        }
+    });
+
+    
+    function addCategoryFormSubmit(event) {
+        event.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        const name = document.getElementById("categoryName").value.trim();
+        const description = document.getElementById("categoryDescription").value.trim();
+
+        fetch("/admin/addCategory", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, description })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.error || "Unknown error occurred");
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Close the Add Category Modal
+            document.getElementById("addCategoryModal").style.display = "none";
+
+            // Show success alert before reloading
+            Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Category added successfully.",
+                confirmButtonText: "OK"
+            }).then(() => {
+                location.reload(); // Reload after clicking OK
+            });
+        })
+        .catch(error => {
+            console.error("Error:", error.message);
+
+            // Show error alert if category already exists
+            Swal.fire({
+                icon: "error",
+                title: "Oops!",
+                text: error.message === "Category already exist" ? "Category already exists." : error.message,
+                confirmButtonText: "OK"
+            });
+        });
+    }
+
+
+    function validateForm() {
+        clearErrorMessage();
+        const name = document.getElementById("categoryName").value.trim();
+        const description = document.getElementById("categoryDescription").value.trim();
+        let isValid = true;
+
+        if (name === "") {
+            displayErrorMessage("name-error", "Please enter a name");
+            isValid = false;
+        } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
+            displayErrorMessage("name-error", "Category name should contain only alphabetic characters");
+            isValid = false;
+        }
+
+        if (description === "") {
+            displayErrorMessage("description-error", "Please enter a description");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function displayErrorMessage(elementId, message) {
+        var errorElement = document.getElementById(elementId);
+        errorElement.innerText = message;
+        errorElement.style.display = "block";
+    }
+
+    function clearErrorMessage() {
+        const errorElements = document.getElementsByClassName("error-message");
+        Array.from(errorElements).forEach(element => {
+            element.innerHTML = "";
+            element.style.display = "none";
+        });
+    }
+
+    //ajax request for add offer and remove offer
+    
+    document.querySelectorAll(".offerBtn").forEach(button => {
+        button.addEventListener("click", function () {
+            const categoryId = this.getAttribute("data-category-id");
+            const actionType = this.getAttribute("data-action"); // "add" or "remove"
+
+            if (actionType === "add") {
+                Swal.fire({
+                    title: "Enter Offer Percentage",
+                    input: "number",
+                    inputAttributes: { min: 1, max: 100, step: 1 },
+                    showCancelButton: true,
+                    confirmButtonText: "Apply Offer",
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        const offerPercentage = result.value;
+                        if (!offerPercentage || offerPercentage < 1 || offerPercentage > 100) {
+                            Swal.fire("Invalid Input", "Enter a valid percentage (1-100).", "error");
+                            return;
+                        }
+
+                        handleOfferRequest("/admin/addOffer", { categoryId, offerPercentage }, "Offer added successfully!");
+                    }
+                });
+            } else if (actionType === "remove") {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This will remove the category offer!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, remove it!",
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        handleOfferRequest("/admin/removeOffer",{categoryId}, "Offer removed successfully!");
+                    }
+                });
+            }
+        });
+   });
+
+    function handleOfferRequest(url, data, successMessage) {
+        console.log(url,data)
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("data:",data)
+            if (data.status) {
+                Swal.fire("Success", successMessage, "success").then(()=>{
+                    location.reload();
+                })
+                 
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        })
+        .catch(error => {
+            Swal.fire("Error", "Something went wrong!", "error");
+            console.error("Error", error);
+        });
+    }
+
+     
+    
+</script>
+
+ 
+<%- include ("../../views/partials/admin/footer") %>

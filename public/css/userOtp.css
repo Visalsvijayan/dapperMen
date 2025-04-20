@@ -1,0 +1,75 @@
+ 
+.otp-verification-container {
+    max-width: 400px;
+    margin: 127px auto;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+  
+  .otp-verification-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+  
+  .otp-verification-description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+  
+  .otp-input-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+  
+  .otp-input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+  
+  .otp-input:focus {
+    border-color: #007bff;
+}
+  
+  .otp-timer {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+  
+  .otp-resend-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+  
+  .otp-resend-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+  
+  .otp-submit-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+  
+  .otp-submit-button:hover {
+    background-color: #218838;
+}

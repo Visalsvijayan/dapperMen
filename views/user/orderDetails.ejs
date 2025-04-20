@@ -1,0 +1,666 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+    .order-details-fullwidth {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        line-height: 1.6;
+    }
+    
+    .breadcrumb {
+        font-size: 15px;
+        color: #666;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .breadcrumb a {
+        color: #0066cc;
+        text-decoration: none;
+        transition: all 0.3s;
+        margin: 0 5px;
+    }
+    
+    .breadcrumb a:hover {
+        color: #004499;
+        text-decoration: underline;
+    }
+    
+    .breadcrumb .separator {
+        color: #999;
+        margin: 0 5px;
+    }
+    
+    .order-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .order-meta {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .order-id {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #222;
+    }
+    
+    .status-display {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .status-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #444;
+    }
+    
+    .status-timeline {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        padding-top: 25px;
+    }
+    
+    .status-timeline::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(to right, #4CAF50 30%, #e0e0e0 30%);
+        z-index: 1;
+        border-radius: 3px;
+    }
+    
+    .status-step {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        width: 23%;
+    }
+    
+    .status-indicator {
+        width: 24px;
+        height: 24px;
+        background: #e0e0e0;
+        border-radius: 50%;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .status-step.active .status-indicator {
+        background: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+    
+    .status-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .status-step.active .status-label {
+        color: #4CAF50;
+    }
+    
+    .order-content {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .product-section {
+        flex: 2;
+        min-width: 400px;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .summary-section {
+        flex: 1;
+        min-width: 300px;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        align-self: flex-start;
+    }
+    
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #222;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .product-card {
+        display: flex;
+        gap: 20px;
+        padding: 15px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .product-card:last-child {
+        border-bottom: none;
+    }
+    
+    .product-image {
+        width: 120px;
+        height: 120px;
+        background: #e0e0e0;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 14px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .product-info {
+        flex-grow: 1;
+    }
+    
+    .product-name {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #222;
+    }
+    
+    .product-spec {
+        display: flex;
+        margin-bottom: 6px;
+        font-size: 14px;
+    }
+    
+    .spec-label {
+        font-weight: 500;
+        color: #555;
+        min-width: 80px;
+    }
+    
+    .spec-value {
+        color: #333;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+    
+    .summary-total {
+        font-weight: 700;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+        font-size: 17px;
+    }
+    
+    .payment-info {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .payment-method {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 15px;
+    }
+    
+    .payment-icon {
+        font-size: 20px;
+        color: #4CAF50;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-cancel {
+        background: #ff4444;
+        color: white;
+    }
+    
+    .btn-cancel:hover {
+        background: #e53935;
+        transform: translateY(-2px);
+    }
+    
+    .btn-help {
+        background: #f8f9fa;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+    
+    .btn-help:hover {
+        background: #e9ecef;
+    }
+
+
+
+    .status-display {
+  margin: 30px 0;
+}
+
+.status-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.status-timeline {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 30px;
+}
+
+.status-step {
+  text-align: center;
+  flex: 1;
+  position: relative;
+}
+
+.status-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  width: 100%;
+  height: 4px;
+  background-color: #ccc;
+  z-index: -1;
+  transform: translateX();
+}
+
+/* .status-step.active:not(:last-child)::after {
+  background-color: green;
+} */
+.status-step.line-active:not(:last-child)::after {
+  background-color: green;
+}
+
+
+.status-indicator {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto;
+  background-color: #ccc;
+  color: white;
+  border-radius: 50%;
+  line-height: 30px;
+  font-weight: bold;
+  z-index: 1;
+  position: relative;
+}
+
+.status-step.active .status-indicator {
+  background-color: green;
+}
+
+.status-label {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #444;
+}
+
+.status-step.active .status-label {
+  color: green;
+}
+
+
+
+    
+    @media (max-width: 768px) {
+        .order-content {
+            flex-direction: column;
+        }
+        
+        .product-section, .summary-section {
+            min-width: 100%;
+        }
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="order-details-fullwidth"  >
+    <div class="breadcrumb">
+        <a href="/">Home</a> <span class="separator">></span> 
+        <a href="/userProfile#orders">My Orders</a> <span class="separator">></span> 
+        <span> #<%=orders.orderId%></span>
+    </div>
+    <div id="invoice">
+        <div class="order-header-container">
+            <div class="order-meta">
+                <div class="order-id">Order #<%=orders.orderId%></div>
+                <%if(orders.status!=='Cancelled'){%>
+                <!-- <div class="status-display">
+                    <div class="status-title">Order Status</div>
+                    <div class="status-timeline">
+                        <div class="status-step active">
+                            <div class="status-indicator">1</div>
+                            <div class="status-label">PENDING</div>
+                        </div>
+                        <div class="status-step">
+                            <div class="status-indicator">2</div>
+                            <div class="status-label">PROCESSING</div>
+                        </div>
+                        <div class="status-step">
+                            <div class="status-indicator">3</div>
+                            <div class="status-label">SHIPPED</div>
+                        </div>
+                        <div class="status-step">
+                            <div class="status-indicator">4</div>
+                            <div class="status-label">DELIVERED</div>
+                        </div>
+                    </div>
+                </div> -->
+                <div class="status-display">
+                    <div class="status-title">Order Status</div>
+                    <div class="" style="display: flex;" >
+                        <% const statusSteps = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Return request', 'Returned']; %>
+                        <% const currentStatusIndex = statusSteps.indexOf(orders.status.trim()); %>
+                
+                        <% statusSteps.forEach((step, index) => { %>
+                            <div class="status-step <%= index <= currentStatusIndex ? 'active' : '' %>">
+                                <div class="status-indicator"><%= index+1%></div>
+                                <div class="status-label"><%= step %></div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+                <%}else{%>
+                    <div class="w-100 position-relative my-4" style="height: 4px; background-color: #dc3545; border-radius: 2px;">
+                        <!-- Cancelled point at the end -->
+                        <div class="position-absolute" style="top: 50%; right: 0; transform: translate(50%, -50%); text-align: center;">
+                          <div class="bg-danger rounded-circle" style="width: 16px; height: 16px;"></div>
+                          <div class="text-danger fw-bold mt-1">Cancelled</div>
+                        </div>
+                      </div>
+                <%}%>      
+            </div>
+        </div>
+        
+        <div class="order-content">
+            <div class="product-section">
+                <%orders.orderItems.forEach(item=>{%>
+                <div class="section-title">Product Details</div>
+                
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="/uploads/product-images/<%= item.product.productImage[0] %>" alt="product image"  >
+                         
+                         
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name"><%= item.product.productName%></div>
+                        <div class="product-spec">
+                            <span class="spec-label">Quantity:</span>
+                            <span class="spec-value"><%= item.quantity%></span>
+                        </div>
+                        <div class="product-spec">
+                            <span class="spec-label">Price:</span>
+                            <span class="spec-value">₹<%=item.price%></span>
+                        </div>
+                        <div class="product-spec">
+                            <span class="spec-label">Status:</span>
+                            <span class="spec-value"><button style="background-color: rgb(248, 154, 12); border-radius: 20px ;color: white;">
+                                 
+                                <%=orders.status%>
+                            </button></span>
+                        </div>
+                    </div>
+                </div>
+               <%})%> 
+            </div>
+            
+            <div class="summary-section">
+                <div class="section-title">Order Summary</div>
+                
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>₹<%=orders.finalAmount%></span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Charge:</span>
+                    <span>₹0</span>
+                </div>
+                
+                <div class="summary-row summary-total">
+                    <span>Total:</span>
+                    <span>₹ <%=orders.finalAmount%></span>
+                </div>
+                
+                <div class="payment-info">
+                    <div class="payment-method">
+                        <i class="payment-icon fas fa-money-bill-wave"></i>
+                        <span><strong>Payment Method:</strong> 
+                            <%if(orders.payment==='cod'){%>
+                            CASH ON DELIVERY
+                        </span>
+                        <%}%>
+                    </div>
+                </div>
+            </div>
+        </div>
+     
+    </div>
+    
+    <div class="action-buttons">
+        <button class="btn btn-cancel"onclick="confirmCancelOrder('<%= orders._id %>',event)">
+            <i class="fas fa-times-circle"></i><a style="color: white;" href="">CANCEL ORDER</a> 
+        </button>
+        <button type="button"  class="btn btn-success"  onclick="downloadInvoice('<%=orders._id%>')">
+            <i class="fa-solid fa-download"></i>DOWNLOAD INVOICE
+        </button>
+        <%if(orders.status==='Delivered'){%>
+        <button id="return-Product" class="btn btn-primary"><i class="fas fa-undo"></i>RETURN PRODUCT</button>
+        <%}%>
+    </div>
+   
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    
+    function confirmCancelOrder(orderId,event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to cancel this product?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect to the cancel URL (GET request or can also be POST via AJAX)
+                window.location.href = `/cancel-Order?orderId=${orderId}`;
+            }
+        });
+    }
+
+
+    function downloadInvoice(orderId) {
+            const element = document.getElementById('invoice');
+
+            const opt = {
+                margin: 0, // Remove large top margin
+                filename: 'invoice.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    scrollY: 0 // Prevent cropping from scroll
+                },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // Handle page breaks
+            };
+
+            html2pdf().set(opt).from(element).save()
+                .then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Invoice Downloaded!',
+                        text: 'Your invoice PDF has been successfully downloaded.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                })
+                .catch((err) => {
+                    console.error("PDF error:", err);
+                    alert("PDF generation failed.");
+                });
+        }
+
+    //return product function
+
+     
+    document.getElementById('return-Product').addEventListener('click', async (event) => {
+    event.preventDefault();
+    const orderId = "<%=orders._id%>";
+
+    try {
+        const { value: reason } = await Swal.fire({
+            title: 'Return Reason',
+            input: 'textarea',
+            inputLabel: 'Please provide a reason for return:',
+            inputPlaceholder: 'Type your reason here...',
+            inputAttributes: {
+                'aria-label': 'Return reason'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (reason) {
+            const confirmResult = await Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to request a return for this order?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, return it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (confirmResult.isConfirmed) {
+                const response = await fetch(`/return-Order-Request/${orderId}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        status: 'Return request',
+                        reason: reason
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: "Status Updated",
+                        text: "Order status updated successfully",
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed!',
+                        text: 'Failed to return the product.'
+                    });
+                }
+            }
+        } else {
+            // Optional: alert if user didn't provide a reason
+            Swal.fire({
+                icon: 'info',
+                title: 'Cancelled',
+                text: 'Return request was cancelled or no reason provided.'
+            });
+        }
+
+    } catch (error) {
+        console.error("Return product error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            text: 'Something went wrong. Please try again.'
+        });
+    }
+});
+
+
+
+</script>
+<%- include("../../views/partials/user/footer") %>

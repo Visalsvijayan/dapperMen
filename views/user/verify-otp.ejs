@@ -1,0 +1,158 @@
+ 
+<%- include ("../partials/user/header") %>
+<div class="otp-verification-container">
+    <h2 class="otp-verification-title">OTP Verification</h2>
+    <p class="otp-verification-description">Enter the 6-digit OTP sent to your email/phone.</p>
+    <div>
+        <form id="">
+            <div  class="otp-input-container">
+                <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this)" onkeydown="moveToPrevious(event, this)">
+                <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this)" onkeydown="moveToPrevious(event, this)">
+                <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this)" onkeydown="moveToPrevious(event, this)">
+                <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this)" onkeydown="moveToPrevious(event, this)">
+                <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this)" onkeydown="moveToPrevious(event, this)">
+                <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this)" onkeydown="moveToPrevious(event, this)">
+    
+                <input type="hidden" name="otp" id="otpField">
+    
+                
+            </div>
+           
+           
+        </form>
+        <p class="otp-timer">Time remaining: <span id="otp-timer-countdown">02:00</span></p>
+        <button class="otp-resend-button" id="otp-resend-button" disabled>Resend OTP</button>
+        <button class="otp-submit-button" id="verifyOtpBtn">Submit</button>
+      
+    </div>
+    
+</div>
+<%- include ("../partials/user/footer") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.all.min.js"></script>
+<script>
+    // Timer functionality
+let timeLeft = 60; // 1 minutes in seconds
+const timerElement = document.getElementById('otp-timer-countdown');
+const resendButton = document.getElementById('otp-resend-button');
+
+function updateTimer() {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+  if (timeLeft === 0) {
+    clearInterval(timerInterval);
+    resendButton.disabled = false;
+  } else {
+    timeLeft--;
+  }
+}
+
+const timerInterval = setInterval(updateTimer, 1000);
+
+// Resend OTP functionality
+resendButton.addEventListener('click', () => {
+  
+  timeLeft = 60; // Reset timer
+  resendButton.disabled = true;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+});
+
+// OTP input navigation
+function moveToNext(input) {
+  if (input.value.length === 1) {
+    const nextInput = input.nextElementSibling;
+    if (nextInput) {
+      nextInput.focus();
+    }
+  }
+}
+
+function moveToPrevious(event, input) {
+  if (event.key === 'Backspace' && input.value.length === 0) {
+    const prevInput = input.previousElementSibling;
+    if (prevInput) {
+      prevInput.focus();
+    }
+  }
+}
+
+//otp validation
+ 
+document.getElementById("verifyOtpBtn").addEventListener("click", validateOtpform);
+ 
+
+function validateOtpform(event){
+    event.preventDefault();
+    document.getElementById('otpField').value = Array.from(document.querySelectorAll('.otp-input')).map(i => i.value).join('');
+    const otpInput=document.getElementById('otpField').value 
+    console.log('otp fetched from fronted')
+    $.ajax({
+        type:"POST",
+        url:"/verify-otp",
+        data:{otp:otpInput},
+        success:function(response){
+            if(response.success){
+                
+                Swal.fire({
+                    title: "OTP Verified successfully",
+                    icon: "success",
+                    timer:1500
+                }).then(()=>{
+                    window.location.href=response.redirectUrl;
+                });
+            }
+            else{
+                Swal.fire({
+                    icon:"error",
+                    title:"Error",
+                    text:"An error occured while resending OTP,please try again"
+                })
+            }
+        },
+        error:function(){
+            Swal.fire({
+                icon:"error",
+                title:"Invalid OTP",
+                text:"please try again"
+
+            })
+        }
+
+
+       
+    }) 
+    return false;   
+
+}   
+
+
+//to resend otp 
+function resendOtp(){
+    $.ajax({
+        type:"POST",
+        url:"/resend-otp",
+        success:function(response){
+            if(response.success){
+                Swal.fire({
+                    icon:"success",
+                    title:"otp resend successfully"
+                })
+            }
+            else{
+                Swal.fire({
+                    icon:"error",
+                    title:"Error",
+                    text:"An error occured while resending OTP"
+                })
+            }
+        }
+    })
+    return false
+}
+
+document.getElementById("otp-resend-button").addEventListener("click",resendOtp)
+
+
+</script>

@@ -1,0 +1,865 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+    /* Improved checkout styling */
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+    }
+    .checkout-section {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .checkout-section h4 {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .product-table th {
+        text-align: left;
+        padding: 12px;
+        background: #f9f9f9;
+        font-weight: 600;
+    }
+    .product-table td {
+        padding: 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #eee;
+    }
+    .product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .address-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 15px;
+    }
+    .address-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        transition: all 0.3s;
+    }
+    .address-card:hover {
+        border-color: #4caf50;
+    }
+    .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .payment-option {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .order-summary {
+        position: sticky;
+        top: 20px;
+    }
+    .summary-table {
+        width: 100%;
+    }
+    .summary-table td {
+        padding: 8px 0;
+    }
+    .summary-table tr:last-child td {
+        border-top: 1px solid #eee;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+    .btn-place-order {
+        width: 100%;
+        padding: 12px;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .btn-place-order:hover {
+        background: #3d8b40;
+    }
+    .coupon-section {
+        margin-top: 20px;
+    }
+    .coupon-input {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .coupon-input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .coupon-input button {
+        padding: 10px 20px;
+    }
+    @media (max-width: 768px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-grid">
+        <!-- Left Column - Products and Address -->
+        <div class="left-column">
+            <!-- Products Section -->
+            <div class="checkout-section">
+                <h4>Your Order (<%= data && data[0] && data[0].allItem ? data[0].allItem.length : 0 %> items)</h4>
+
+                <div class="table-responsive">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(data.length>0 && data[0].allItem && data[0].allItem.length > 0) { %>
+                                <% for(let i = 0; i < data[0].allItem.length; i++) { %>
+                                    <% let item = data[0].allItem[i]; %>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 15px;">
+                                                <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                                                     alt="<%= item.product.productName %>" 
+                                                     class="product-image">
+                                                <div>
+                                                    <h5 style="margin: 0; font-size: 14px;"><%= item.product.productName %></h5>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>₹<%= item.product.salePrice %></td>
+                                        <td><%= item.cartItem.quantity %></td>
+                                        <td>₹<%= item.itemTotal %></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" onclick="confirmRemove('<%= item.product._id %>')">
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            <% } else { %>    
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Your cart is empty</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+             
+            <div class="checkout-section">
+                <h4>Shipping Address</h4>
+                <% if(userAddress && userAddress.address.length > 0) { %>
+                    <div class="address-grid">
+                        <% userAddress.address.forEach((address, index) => { %>
+                            <div class="address-card <%= index === 0 ? 'selected-address' : '' %>" data-address-id="<%= address._id %>">
+                                <input type="radio" name="selectedAddress" value="<%= address._id %>" 
+                                       <%= index === 0 ? 'checked' : '' %>>
+                                <h5><%= address.addressType %></h5>
+                                <address style="font-style: normal; margin: 10px 0;">
+                                    <%= address.name %><br>
+                                    <%= address.landMark %><br>
+                                    <%= address.city %>, <%= address.state %><br>
+                                    <%= address.pincode %><br>
+                                    Phone: <%= address.phone %><br>
+                                    <% if(address.altPhone) { %>
+                                        Alt: <%= address.altPhone %>
+                                    <% } %>
+                                </address>
+                                <div class="d-flex justify-content-between">
+                                    <!-- <a href="/editAddress?id=<%= address._id %>&returnTo=checkout" 
+                                       class="btn btn-sm btn-outline-primary">Edit</a> -->
+                                       <button class="btn btn-info" data-action="edit-address" data-id="<%= address._id %>">Edit</button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-secondary">No addresses found</div>
+                <% } %>
+                <!-- <div class="mt-3">
+                    <a href="" data-bs-toggle="modal" data-bs-target="#addressModal" class="btn btn-primary">+ Add New Address</a>
+                </div> -->
+                <button class="btn btn-primary" data-action="add-address">Add Address</button>
+            </div>
+            <!-- Payment Method Section -->
+            <div class="checkout-section">
+                <h4>Payment Method</h4>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input class="form-check-input payment" type="radio" value="cod" 
+                               name="payment_option" id="CashOnDelivey" checked>
+                        <span style="margin-left: 10px;">Cash on Delivery</span>
+                    </label>
+                    <label class="payment-option">
+                        <input class="form-check-input payment"  value="razorpay" 
+                               type="radio" name="payment_option" id="Razorpay">
+                        <span style="margin-left: 10px;">Razorpay</span>
+                    </label>
+                    <label class="payment-option">
+                        <input class="form-check-input payment"  value="wallet" 
+                               type="radio" name="payment_option" id="wallet">
+                        <span style="margin-left: 10px;">Wallet</span>
+                    </label>
+                </div>
+                <div id="walletAmountBox" style="display: none; margin-top: 10px; color:Red">
+                    <strong>Wallet Balance:</strong> ₹<%= user.wallet.balance %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Order Summary -->
+         
+        <div class="right-column">
+            <div class="checkout-section order-summary">
+                <h4>Order Summary</h4>
+                <table class="summary-table">
+                    <tbody>
+                        <% if(data.length>0 && data[0].allItem && data[0].allItem.length > 0) { %>
+                        <tr>
+                            <td>Subtotal</td>
+                            <td id="subtotal">₹<%=data[0].grandTotal%> %></td>
+                        </tr>
+                        <tr>
+                            <td>Shipping</td>
+                            <td><em>Free</em></td>
+                        </tr>
+                        <tr>
+                            <td>Discount</td>
+                            <td id="discount">₹0</td>
+                        </tr>
+                        <tr>
+                            <td>Total</td>
+                            <td class="product-subtotal">
+                                <span id="totalValue">₹<%=data[0].grandTotal%> %></span>
+                            </td>
+                        </tr>
+                       <%}else{%>
+                        <tr>
+                            <td>No order summery</td>
+                        </tr> 
+                       <%}%> 
+                    </tbody>
+                </table>
+
+                <!-- Coupon Section -->
+                <div class="coupon-section">
+                    <h5>Apply Coupon</h5>
+                    <div class="coupon-input">
+                        <input type="text" class="form-control" id="inputCoupon" placeholder="Enter coupon code">
+                        <button class="btn btn-primary" id="applyButton">Apply</button>
+                    </div>
+                    <div class="available-coupons">
+                        <h6>Available Coupons</h6>
+                        <p>No coupons available</p>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-place-order" onclick="placeOrder()">Place Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+
+
+  <!-- Add Address Modal -->
+  <!-- Address Modal (Add/Edit) -->
+<div class="modal fade" id="addressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Add Address</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="addressForm">
+          <div class="modal-body">
+            <input type="hidden" id="addressId" name="id">
+             
+            
+            <div class="row mb-3">
+              <div class="form-group col-md-6">
+                <label for="addressType">Address Type*</label>
+                <input type="text" class="form-control" id="addressType" name="addressType" >
+                <div class="invalid-feedback">Required</div>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="name">Name*</label>
+                <input type="text" class="form-control" id="name" name="name" >
+                <div class="invalid-feedback">Alphabets only</div>
+              </div>
+            </div>
+  
+             
+            <div class="row mb-3">
+              <div class="form-group col-md-6">
+                <label for="phone">Phone*</label>
+                <input type="number" class="form-control" id="phone" name="phone" >
+                <div class="invalid-feedback">10 digits required</div>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="altPhone">Alternate Phone*</label>
+                <input type="number" class="form-control" id="altPhone" name="altPhone" >
+                <div class="invalid-feedback">Must differ from phone</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+                <div class="form-group col-md-6">
+                  <label for="city">City*</label>
+                  <input type="text" class="form-control" id="city" name="city" >
+                  <div class="invalid-feedback">Required</div>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="landMark">Landmark*</label>
+                  <input type="text" class="form-control" id="landMark" name="landMark" >
+                  <div class="invalid-feedback">Required</div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="form-group col-md-6">
+                  <label for="state">State*</label>
+                  <input type="text" class="form-control" id="state" name="state" >
+                  <div class="invalid-feedback">required</div>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="pincode">Pincode*</label>
+                  <input type="number" class="form-control" id="pincode" name="pincode" >
+                  <div class="invalid-feedback">required</div>
+                </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save Address</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+  //wallet status when click on the wallet payment
+    const walletRadio = document.getElementById("wallet");
+    const walletBox = document.getElementById("walletAmountBox");
+     walletRadio.addEventListener("change", function () {
+        if (walletRadio.checked) {
+            walletBox.style.display = "block";
+        }
+        else{
+            walletBox.style.display="none"
+        }
+    });
+
+     
+    function confirmRemove(productId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url:`/delete-product?id=${productId}`,
+                    method:'DELETE',
+                    success:(response)=>{
+                        if(response.success){
+                            Swal.fire('Removed!','Item has been removed','success')
+                            .then(()=>{
+                                location.reload();
+                            })
+                        }
+                    },
+                    error:()=>{
+                        Swal.fire('Error','Failed to remove item','error')
+                    }
+                })
+            }
+        })
+    }
+
+    async function placeOrder() {
+        let address = $("input[name='selectedAddress']:checked").val();
+    
+        let payment = $("input[name='payment_option']:checked").val();
+         
+        let dscnt=document.getElementById('discount').textContent;
+        let discount=parseInt(dscnt.replace(/[^/\d.]/g,''));
+        const sum = document.getElementById("totalValue").textContent;
+        let numericValue = parseInt(sum.replace(/[^\d.]/g, ''));
+        const walletAmount=parseInt('<%= user.wallet.balance %>');
+         
+ 
+        
+        if (!payment) {
+            Swal.fire({
+                title: 'NO PAYMENT FOUND!',
+                text: 'Please select your Payment.',
+                icon: 'error',
+                timer: 3000,
+            });
+         } else if (!address) {
+            Swal.fire({
+                title: 'NO ADDRESS FOUND!',
+                text: 'Please select your address.',
+                icon: 'error',
+                timer: 3000,
+            });
+            
+        } else if(payment === "cod" && numericValue > 1000){
+            Swal.fire({
+                title: 'COD Not Allowed!',
+                text: 'Orders above ₹1000 are not allowed for Cash on Delivery (COD).',
+                icon: 'error',
+                timer: 3000,
+            });
+             
+        }else if(payment==='wallet'&&walletAmount<numericValue){
+            
+                Swal.fire({
+                    icon:'error',
+                    title:'Payment Error',
+                    text:'Wallet amount is Insufficient to buy product',
+                    timer:2000,
+                    showConfirmButton:false
+                })
+                 
+ 
+            
+        }
+        
+        else{
+            try {
+                if (payment === 'razorpay') {
+                    // First create Razorpay order only
+                    const response = await $.ajax({
+                        url: '/order/razorpay',
+                        method: 'POST',
+                        data: {
+                            totalPrice: numericValue,
+                            createdOn: new Date().getTime(),
+                            date: new Date(),
+                            addressId: address,
+                            payment: payment,
+                            discount: discount
+                        }
+                    });
+
+                    if (response.success) {
+                        
+                        let finalAmount=numericValue-discount;
+                        initiateRazorpay(
+                            response.amount,
+                            response.razorpayOrder,
+                            response.orderId,
+                            response.key_id,
+                            {
+                                totalPrice: numericValue,
+                                
+                                createdOn: new Date().getTime(),
+                                date: new Date(),
+                                address: address,
+                                payment: payment,
+                                discount: discount,
+                                finalAmount,
+                                
+                                
+                            }
+                        );
+                    }else {
+                        Swal.fire('Error', response.message || 'Failed to initiate Razorpay', 'error');
+                    }
+
+                } else {
+                    // Wallet and COD — place order directly
+                    let url = payment === 'wallet' ? '/order/wallet' : '/order/cod';
+
+                    const response = await $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: {
+                            totalPrice: numericValue,
+                            createdOn: new Date().getTime(),
+                            date: new Date(),
+                            addressId: address,
+                            payment: payment,
+                            discount: discount,
+                            walletAmount
+                        }
+                    });
+
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message,
+                            icon: 'success'
+                        }).then(() => {
+                            window.location.href = response.redirect;
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message || 'Unknown error occurred', 'error');
+                    }
+                }
+
+            } catch (error) {
+                console.error('error in posting data to place order:', error);
+                Swal.fire('Error!', 'Something went wrong.', 'error');
+            }
+    }
+  }
+                
+        
+        
+      
+    
+
+  function initiateRazorpay(amount, razorpayOrder, orderId, key_id, orderData) {
+    const options = {
+        key: key_id,
+        amount: amount,
+        currency: "INR",
+        name: "Your Shop Name",
+        description: "Thank you for shopping",
+        order_id: razorpayOrder.id,
+        handler: function (response) {
+            fetch("/verify-payment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderData: orderData 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Payment Successful!',
+                        text: 'Your order has been placed.',
+                        icon: 'success'
+                    }).then(() => {
+                       
+                        window.location.href = `/place-order-success?orderId=${data.orderId}`;
+                    });
+                } else {
+                    Swal.fire('Error', 'Payment verification failed', 'error');
+                }
+            });
+        }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+}
+
+
+
+
+
+
+ // initialise address modal and handle form submission
+document.addEventListener('DOMContentLoaded', function() {
+  const addressModal = new bootstrap.Modal(document.getElementById('addressModal'));
+  const addressForm = document.getElementById('addressForm');
+  const modalTitle = document.getElementById('modalTitle');
+
+  // Open modal for add
+  document.querySelectorAll('[data-action="add-address"]').forEach(button => {
+    button.addEventListener('click', () => {
+      modalTitle.textContent = 'Add Address';
+      document.getElementById('addressId').value = '';
+      addressForm.reset();
+      addressModal.show();
+    });
+  });
+
+  // Open modal for edit
+  document.querySelectorAll('[data-action="edit-address"]').forEach(button => {
+    button.addEventListener('click', async function() {
+      const addressId = this.dataset.id;
+      try {
+        const response = await fetch(`/getAddress?id=${addressId}`);
+        const address = await response.json();
+        
+        // Populate form
+        Object.keys(address).forEach(field => {
+          const input = document.getElementById(field);
+          if (input) input.value = address[field];
+        });
+        
+        modalTitle.textContent = 'Edit Address';
+        document.getElementById('addressId').value = addressId;
+        addressModal.show();
+      } catch (error) {
+        Swal.fire('Error', 'Failed to load address', 'error');
+      }
+    });
+  });
+
+  // Form submission
+  addressForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const formData = new FormData(this);
+    const isEdit = !!formData.get('id');
+    const url = isEdit ? '/editAddressModal' : '/addAddressModal';
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        
+        addressModal.hide();
+        Swal.fire('Success', isEdit ? 'Address updated!' : 'Address added!', 'success')
+        .then(()=>{
+            const newAddress = result.address;  
+            if (isEdit) {
+                updateAddressInDOM(newAddress);
+            } else {
+                appendNewAddressToDOM(newAddress);
+            }
+        })
+           
+      } else {
+        throw new Error(result.error || 'Operation failed');
+      }
+    } catch (error) {
+      Swal.fire('Error', error.message, 'error');
+    }
+  });
+//helper fns
+function updateAddressInDOM(address) {
+  const card = document.querySelector(`[data-address-id="${address._id}"]`);
+  if (!card) return;
+
+  card.querySelector('h5').textContent = address.addressType;
+  const addressTag = card.querySelector('address');
+  addressTag.innerHTML = `
+    ${address.name}<br>
+    ${address.landMark}<br>
+    ${address.city}, ${address.state}<br>
+    ${address.pincode}<br>
+    Phone: ${address.phone}<br>
+    ${address.altPhone ? `Alt: ${address.altPhone}` : ''}
+  `;
+}
+
+function appendNewAddressToDOM(address) {
+  const container = document.querySelector('.address-grid');
+  const div = document.createElement('div');
+  div.className = 'address-card';
+  div.setAttribute('data-address-id', address._id);
+
+  div.innerHTML = `
+    <input type="radio" name="selectedAddress" value="${address._id}">
+    <h5>${address.addressType}</h5>
+    <address style="font-style: normal; margin: 10px 0;">
+      ${address.name}<br>
+      ${address.landMark}<br>
+      ${address.city}, ${address.state}<br>
+      ${address.pincode}<br>
+      Phone: ${address.phone}<br>
+      ${address.altPhone ? `Alt: ${address.altPhone}` : ''}
+    </address>
+    <div class="d-flex justify-content-between">
+      <button class="btn btn-info" data-action="edit-address" data-id="${address._id}">Edit</button>
+    </div>
+  `;
+
+  container.appendChild(div);
+
+   
+  div.querySelector('[data-action="edit-address"]').addEventListener('click', () => {
+    openEditModal(address._id);
+  });
+}
+
+async function openEditModal(addressId) {
+  try {
+    const response = await fetch(`/getAddress?id=${addressId}`);
+    const address = await response.json();
+
+    Object.keys(address).forEach(field => {
+      const input = document.getElementById(field);
+      if (input) input.value = address[field];
+    });
+
+    modalTitle.textContent = 'Edit Address';
+    document.getElementById('addressId').value = addressId;
+    addressModal.show();
+  } catch (error) {
+    Swal.fire('Error', 'Failed to load address', 'error');
+  }
+}
+
+document.querySelectorAll('[data-action="edit-address"]').forEach(button => {
+  button.addEventListener('click', function () {
+    openEditModal(this.dataset.id);
+  });
+});
+  
+
+
+
+
+  function validateForm() {
+    let isValid = true;
+     
+    const requiredFields = ["addressType", "name", "city", "landMark", "state", "pincode", "phone", "altPhone"];
+       requiredFields.forEach(function(field) {
+           const input = document.getElementById(field);
+           const inputValue = input.value.trim();
+           const errorElement = document.getElementById(field + '-error');
+
+
+           if (inputValue === "") {
+               if (!errorElement) {
+                   const errorMessage = "This field is required.";
+                   const errorDiv = document.createElement('div');
+                   errorDiv.className = "text-danger";
+                   errorDiv.textContent = errorMessage;
+                   errorDiv.id = field + '-error';
+                   input.parentNode.appendChild(errorDiv);
+               }
+               isValid = false;
+           } else {
+               if (errorElement) {
+                   errorElement.remove();
+               }
+           }
+       });
+
+
+       const addressType = document.getElementById('addressType').value;
+       const name = document.getElementById('name').value;
+       const city = document.getElementById('city').value;
+       const landMark = document.getElementById('landMark').value;
+       const state = document.getElementById('state').value;
+       const pincode = document.getElementById('pincode').value;
+       const phone = document.getElementById('phone').value;
+       const altPhone = document.getElementById('altPhone').value;
+       const namePattern = /^[A-Za-z\s]+$/;
+       const pincodePattern = /^\d{6}$/;
+       const phonePattern = /^\d{10}$/;
+       if (!namePattern.test(name)) {
+           Swal.fire({
+               title: 'Error',
+               text: 'Name should contain alphabets only.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+       if (!namePattern.test(city)) {
+           Swal.fire({
+               title: 'Error',
+               text: 'City should contain alphabets only.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+       if (!namePattern.test(landMark)) {
+           Swal.fire({
+               title: 'Error',
+               text: 'Landmark should contain alphabets only.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+       if (!namePattern.test(state)) {
+           Swal.fire({
+               title: 'Error',
+               text: 'State should contain alphabets only.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+       if (!pincodePattern.test(pincode)) {
+           Swal.fire({
+               title: 'Error',
+               text: 'Pincode should be a 6-digit number.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+       if (!phonePattern.test(phone)) {
+           Swal.fire({
+               title: 'Error',
+               text: 'Phone number should be a 10-digit number.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+       if (!phonePattern.test(altPhone)) {
+           Swal.fire({
+               title: 'Error',
+               text: 'Alternate phone number should be a 10-digit number.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+       if (phone === altPhone) {
+           Swal.fire({
+               title: 'Error',
+               text: 'Phone number and alternate phone number should be different.',
+               icon: 'error'
+           });
+           isValid = false;
+       }
+     
+    return isValid;
+  }
+});
+     
+</script>
+
+<%- include("../../views/partials/user/footer") %>

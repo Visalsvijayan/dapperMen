@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .order-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        }
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin/Dashboard"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="/admin/orders">Order Management</a></li>
+                <li class="breadcrumb-item active" aria-current="page">#<%=orders[0].orderId%></li>
+            </ol>
+        </nav>
+
+        <!-- Order Header -->
+        <div class="order-header text-white p-4 mb-4 rounded-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <div class="text-center text-md-start mb-3 mb-md-0">
+                    <h1 class="h3 mb-2">Order #<%=orders[0].orderId%></h1>
+
+                    <% const date = new Date(orders[0].createdOn); %>
+                    <% const formatted = date.toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    }); %>
+                    <p class="mb-0"><i class="bi bi-calendar me-1"></i> Placed on <%= formatted.split(', ')[0] + ', ' + formatted.split(', ')[1]   %></p>
+               
+                </div>
+                <span class="badge bg-white text-dark fs-6 px-3 py-2 rounded-pill">
+                    <i class="bi bi-clock-history me-1"></i> <span id="order-status"><%=orders[0].status%></span>
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Order Items -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0"><i class="bi bi-cart3 me-2 text-primary"></i> Order Items</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <%if(orders&&orders.length>0){%>
+                                        <%orders[0].orderItems.forEach((item)=>{%>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="/uploads/product-images/<%= item.product.productImage[0] %>" alt="Product" class="product-img me-3 rounded-2">
+                                                        <div>
+                                                            <h6 class="mb-1"><%=item.product.productName%></h6>
+                                                            <small class="text-muted">Color: <%=item.product.color%> </small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end align-middle"> ₹<%=item.product.salePrice%></td>
+                                                <td class="text-center align-middle"><%=item.quantity%></td>
+                                                <td class="text-end align-middle fw-bold"> ₹ <%= item.price * item.quantity %></td>
+                                            </tr>
+                                             
+                                             
+                                        <%})%>
+                                   <%}%> 
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approval Section -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0"><i class="bi bi-clipboard-check me-2 text-primary"></i> Cancel Order Request</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-center">Qty</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <%if(orders[0].status==="Return request"){%>
+                                    <tr>
+                                        <td>Wireless Bluetooth Headphones</td>
+                                        <td class="text-center">1</td>
+                                        <td>Price verification needed</td>
+                                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-success me-1" onclick="approveReturn('<%=orders[0]._id%>',event)">Approve</button>
+                                            <button class="btn btn-sm btn-danger" onclick="rejectReturn('<%=orders[0]._id%>',event)" >Reject</button>
+                                        </td>
+                                    </tr>
+                                    <%}else{%>
+                                    <tr>
+                                        <td>No Items</td>
+                                    </tr>
+                                    <%}%>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Information -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0"><i class="bi bi-truck me-2 text-primary"></i> Shipping Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <div class="p-3 bg-light rounded">
+                                    <h6 class="text-uppercase small text-muted mb-3">Shipping Address</h6>
+                                    <address class="mb-0">
+                                        <strong><%=address.name%></strong><br>
+                                        
+                                        <%=address.city%><br>
+                                        <%=address.landMark%>, <%=address.pincode%><br>
+                                        <%=address.state%><br>
+                                        <i class="bi bi-telephone me-1"></i> <%=address.phone%>
+                                    </address>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h6 class="text-uppercase small text-muted mb-3">Shipping Method</h6>
+                                    <p class="mb-2">
+                                        <i class="bi bi-box-seam me-2"></i> <strong>Standard Shipping</strong>
+                                    </p>
+                                     
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0"><i class="bi bi-credit-card me-2 text-primary"></i> Payment Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-uppercase small text-muted mb-3">Payment Details</h6>
+                            <%if(orders[0].payment==='cod'){%>
+                                <p>CASH ON DELIVERY</p>
+                            <%}%>    
+                            <!-- <p class="mb-2">
+                                <i class="bi bi-credit-card-2-front me-2"></i> <strong>Visa ending in 4242</strong>
+                            </p>
+                            <p class="mb-2">
+                                <i class="bi bi-cash-coin me-2"></i> Paid on June 12, 2023 at 10:32 AM
+                            </p>
+                            <p class="mb-0">
+                                <i class="bi bi-receipt me-2"></i> Transaction ID: TXN789456123
+                            </p> -->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Order Summary -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2 text-primary"></i> Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span class="fw-semibold"> ₹<%=orders[0].totalPrice%></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping:</span>
+                            <span class="fw-semibold"> ₹ 0</span>
+                        </div>
+                         
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total:</span>
+                            <span> ₹<%=orders[0].totalPrice%></span>
+                        </div>
+                        <hr>
+                        <!-- <button class="btn btn-outline-danger w-100">
+                            <i class="bi bi-x-circle"></i> Cancel Order
+                        </button> -->
+                    </div>
+                </div>
+
+                <!-- Customer Details -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0"><i class="bi bi-person-circle me-2 text-primary"></i> Customer Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <h5><%=user.name%></h5>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-envelope me-1"></i> <%=user.email%>
+                        </p>
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-telephone me-1"></i>  <%=address.phone%>
+                        </p>
+                         
+                    </div>
+                </div>
+
+                <!-- Order Status Update -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square me-2 text-primary"></i> Update Order Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="status-select" class="form-label">Change Status</label>
+                            <select class="form-select" id="status-select">
+                                <option value="Processing">Processing</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Out For Delivery">Out For Delivery</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary w-100 py-2 fw-bold" id="update-status-btn">
+                            <i class="bi bi-check-circle me-1"></i> Update Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('update-status-btn').addEventListener('click', function() {
+            const newStatus = document.getElementById('status-select').value;
+            const statusBadge = document.querySelector('.badge');
+          
+            // Update the status display
+            document.getElementById('order-status').textContent = newStatus;
+        })    
+            
+    //update database for change status
+          document.getElementById('update-status-btn').addEventListener("click",async()=>{
+            const orderId="<%=orders[0]._id%>";
+            try {
+                const selectedStatus=document.getElementById('status-select').value;
+                const response=await fetch(`/admin/update-Order-Status/${orderId}`,{
+                    method:"PATCH",
+                    headers:{
+                        "content-Type":"application/json",
+                    },
+                    body:JSON.stringify({status:selectedStatus}),
+                })
+                const result=await response.json();
+                if(result.success){
+                    Swal.fire({
+                        icon:'success',
+                        title:"Status Updated",
+                        text:"order status updated successfully",
+                        timer:2000,
+                        showConfirmButton:false
+                        
+                    })
+                    .then(()=>{
+                        location.reload();
+                    })
+
+                }
+                else{
+                    alert("failed to update status")
+                }
+            } catch (error) {
+                console.error("error in updation of order status",error)
+                alert("something went wrong")
+            }
+
+          })
+
+     // Approve Return Request
+    async function approveReturn(orderId, event) {
+        event.preventDefault();
+        try {
+            const result = await Swal.fire({
+                title: 'Approve Return Request?',
+                text: "Are you sure you want to approve the return?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Approve'
+            });
+
+            if (result.isConfirmed) {
+                const response = await fetch(`/admin/approve-return/${orderId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Return Approved',
+                        text: 'The return request has been approved.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to approve return.'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error approving return:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong while approving return.'
+            });
+        }
+    }
+
+    // Reject Return Request
+    async function rejectReturn(orderId, event) {
+        event.preventDefault();
+        try {
+            const result = await Swal.fire({
+                title: 'Reject Return Request?',
+                text: "Are you sure you want to reject the return?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Reject'
+            });
+
+            if (result.isConfirmed) {
+                const response = await fetch(`/admin/reject-return/${orderId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Return Rejected',
+                        text: 'The return request has been rejected.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to reject return.'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error rejecting return:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong while rejecting return.'
+            });
+        }
+    }
+   
+
+
+            
+</script>
+</body>
+</html>

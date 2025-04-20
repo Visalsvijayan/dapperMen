@@ -1,0 +1,91 @@
+<%- include("../../views/partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    .order-container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+    }
+    .order-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .order-summary, .order-details {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .btn-action {
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        margin: 0 10px;
+    }
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container order-container my-5">
+<div class="card p-4 shadow">
+    <!-- Order Confirmation Header -->
+    <div class="order-header">
+        <h2 class="fw-bold text-success">✅ Your Order Has Been Placed!</h2>
+        <p class="lead">Thank you for your purchase. A confirmation email has been sent to your email.</p>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="order-summary">
+        <h5 class="fw-bold mb-3">Order Summary</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Order ID:</strong><%=orid%></p>
+                <p><strong>Order Date:</strong> <%=date%></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Payment Method:</strong><%=payment%></p>
+                <h5 class="fw-bold text-primary">Total: ₹<%=totalPrice%></h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Billing & Shipping Information -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="order-details">
+                <h5 class="fw-bold mb-3">Billing Address</h5>
+                <p><%=address.name%><br>
+                <%=address.city%><br>
+                <%=address.state%>,<%=address.pincode%><br>
+                <%=address.phone%></p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="order-details">
+                <h5 class="fw-bold mb-3">Shipping Address</h5>
+                <p>Sevatlis Kv <br> Gardinagar <br> Kamuri, 678085 <br> Phone: 9876543212</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="/order-Details?orderId=<%=orid%>" class="btn btn-primary btn-action">
+            <i class="bi bi-eye-fill"></i> View Order Details
+        </a>
+        <a href="/shop" class="btn btn-success btn-action text-white text-decoration-none">
+            Continue Shopping
+        </a>
+    </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<%- include("../../views/partials/user/footer") %>

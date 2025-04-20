@@ -1,0 +1,105 @@
+.custom-admin .content {
+    flex: 1;
+}
+
+.custom-admin .admin-text {
+    max-width: 375px;
+    width: 100%;
+    margin: 0 auto;
+    letter-spacing: 3px;
+    color: rgba(0,5,20,.65);
+    text-transform: uppercase;
+    font-family: 'Open Sans Condensed', sans-serif;
+}
+
+.custom-admin .client-logo {
+    margin: 0 auto 1rem;
+    display: block;
+}
+
+.custom-admin .panel {
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.125);
+    border: 1px solid rgba(0,0,0,0.45);
+    max-width: 375px;
+    width: 100%;
+    padding: 2rem;
+    margin: 0 auto;
+}
+
+.custom-admin .m-top { margin-top: 1rem;}
+.custom-admin .m-top-l { margin-top: 2rem;}
+.custom-admin .m-top-xl { margin-top: 3rem;}
+
+.custom-admin label {
+    color: #aaa;
+    font-weight: 600;
+}
+
+.custom-admin input[type="text"],
+.custom-admin input[type="password"] {
+    border-radius: 3px;
+    border: 2px solid #dedede;
+    box-shadow: none;
+    color: #555;
+}
+
+.custom-admin input[type="text"]:focus,
+.custom-admin input[type="password"]:focus {
+    border: 2px solid #dedede;
+}
+
+.custom-admin input[type="submit"] {
+    background: #f47621;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 1.25rem;
+    border: 0 none;
+    border-radius: 3px;
+    padding: 1.5rem;
+    line-height: 0;
+    display: block;
+    width: 100%;
+    font-family: 'Open Sans Condensed', sans-serif;
+}
+
+.custom-admin input[type="submit"]:hover {
+    background: #e36510;
+}
+
+.custom-admin .forgot-pw {
+    display: block;
+    text-align: center;
+    margin-top: .875rem;
+    font-size: 1rem;
+}
+
+.custom-admin footer {
+    padding-top: 20px;
+    text-align: center;
+}
+
+.custom-admin footer img {
+    opacity: .5;
+    margin-bottom: 1rem;
+}
+
+.custom-admin footer img:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.custom-admin footer .row {
+    max-width: 100%;
+}
+
+@media screen and (min-width: 641px) {
+    .custom-admin footer .columns:nth-child(1) {
+        text-align: left;
+    }
+    .custom-admin footer .columns:nth-child(2) {
+        text-align: right;
+    }
+}

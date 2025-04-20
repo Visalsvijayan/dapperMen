@@ -1,0 +1,223 @@
+/* Category Management Specific Styles */
+.category-management-container {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.category-management-container h1 {
+    text-align: center;
+    color: #333;
+}
+
+.category-management-search-bar {
+    margin-bottom: 20px;
+}
+
+.category-management-search-bar input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.category-management-actions {
+    margin-bottom: 20px;
+}
+
+.category-management-actions button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.category-management-actions button:hover {
+    background-color: #218838;
+}
+
+.category-management-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.category-management-table th, .category-management-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.category-management-table th {
+    background-color: #f8f9fa;
+}
+
+.category-management-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.category-management-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+.category-management-button:hover {
+    opacity: 0.8;
+}
+
+/* Modal Styles */
+.category-management-modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+.category-management-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+.category-management-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+
+.category-management-close:hover,
+.category-management-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.category-management-modal-content form {
+    display: flex;
+    flex-direction: column;
+}
+
+.category-management-modal-content form label {
+    margin-bottom: 10px;
+}
+
+.category-management-modal-content form input {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.category-management-modal-content form button {
+    padding: 10px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.category-management-modal-content form button:hover {
+    background-color: #218838;
+}
+
+/* Modal Styles */
+.add-category-modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+.add-category-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+}
+
+.add-category-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.addCategoryModal{
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+
+}
+
+.add-category-close:hover,
+.add-category-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.add-category-modal-content form {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-category-modal-content form label {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.add-category-modal-content form input,
+.add-category-modal-content form textarea {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.add-category-modal-content form textarea {
+    resize: vertical;
+}
+
+.add-category-button {
+    padding: 10px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-category-button:hover {
+    background-color: #218838;
+}

@@ -1938,7 +1938,7 @@ ol {
 
 .footer {
 	background: #111111;
-	padding-top: 70px;
+	padding-top: 14px; /*70*/
 }
 
 .footer__about {
@@ -3366,7 +3366,7 @@ ol {
 
 @media only screen and (min-width: 1200px) {
 	.container {
-		max-width: 1170px;
+		max-width:  1469px;
 	}
 }
 

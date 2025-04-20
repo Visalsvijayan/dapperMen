@@ -1,0 +1,36 @@
+<%- include ("../../views/partials/admin/header") %>
+<style>
+    .container{
+        padding-top: 100px;
+    }
+</style>
+<link rel="stylesheet" href="sweetalert2.min.css">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 mt-60">
+            <form method="post" action="/admin/editCategory/<%=category._id%>">
+                <div class="d-grid text-end mt-30 col-md-5">
+                    <button class="btn btn-primary" type="submit">Update category</button>
+                </div>
+                <div class="mb-4 mt-30">
+                    <label for="product_name" class="form-label"></label>
+                    <input type="text" name="categoryName" value="<%=category.name%>" class="form-control border" />
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control border"><%=category.description%></textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    
+   
+</script>
+<%- include ("../../views/partials/admin/footer") %>
