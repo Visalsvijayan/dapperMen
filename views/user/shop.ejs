@@ -242,7 +242,68 @@
   padding-left: 70px;
   margin-left: 0;
 }
- 
+/*for responsive*/
+@media (max-width: 768px) {
+  .shop-topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-form {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .sort-dropdown {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .sort-select {
+    width: 100%;
+  }
+
+  .product-list-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .product-grid {
+    width: 100%;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .product-card {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .price-button {
+    width: 100%;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pagination a {
+    flex: 1;
+    text-align: center;
+  }
+
+  .wishlist-btn {
+    top: 10px;
+    right: 10px;
+  }
+}
  
 </style>
 

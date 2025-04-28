@@ -20,6 +20,10 @@ const OrderSchema=new mongoose.Schema({
         price:{
             type:Number,
             default:0
+        },
+        productOfferAmount:{
+            type:Number,
+            default:0
         }
     }],
 
@@ -47,7 +51,7 @@ const OrderSchema=new mongoose.Schema({
     status:{
         type:String,
         required:true,
-        enum:['Pending','Processing','Shipped','Delivered','Reject return product']
+        enum:['Pending','Processing','Shipped','Delivered','Reject return product','Cancelled']
     },
     createdOn:{
         type:Date,

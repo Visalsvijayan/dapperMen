@@ -1,4 +1,5 @@
-const Coupon=require('../../models/couponSchema')
+const Coupon=require('../../models/couponSchema');
+const User = require('../../models/userSchema');
 const getCoupenPage=async(req,res)=>{
     try {
         const coupon=await Coupon.find().sort({createdOn:-1})
@@ -6,6 +7,13 @@ const getCoupenPage=async(req,res)=>{
         const page=parseInt(req.query.page) ||1
         const totalPages=Math.ceil(coupon.length/perPage);
         const pagination = coupon.slice((page - 1) * perPage,page * perPage);
+
+
+        await Coupon.updateMany(
+            { expireOn: { $lt: new Date() }, isActive: true },
+            { $set: { isActive: false } }
+        );
+        
         res.render('coupenManagement',{
             coupons:pagination,
             totalPages,
@@ -65,6 +73,7 @@ const postCouponDetails = async (req, res) => {
     try {
         const data = req.body;
         const couponName = data.code;
+         
 
         // If couponId exists, update the existing coupon
         if (data.couponId) {
@@ -106,7 +115,8 @@ const postCouponDetails = async (req, res) => {
                 offer: data.value,
                 minimumPrice: data.minimumPurchase,
                 maxDiscount: data.maxDiscount,
-                isActive: true
+                isActive: true,
+            
             });
 
             await newCoupon.save();
@@ -125,11 +135,11 @@ const getEditCoupon=async(req,res)=>{
         console.log('hieeee')
         const couponId = req.params.id;
         const coupon = await Coupon.findById(couponId);
-        console.log(couponId," ",coupon)
+         
         if (!coupon) {
           return res.status(404).json({ error: 'Coupon not found' });
         }
-        console.log('coupn,',coupon)
+         
         res.json(coupon);
       } catch (error) {
         res.status(500).json({ error: 'Server error' });
@@ -137,19 +147,45 @@ const getEditCoupon=async(req,res)=>{
 }
 
 const deleteCoupon=async(req,res)=>{
+    console.log('delete')
     try {
-        const couponId=req.query.id;
+        const couponId=req.body.couponId;
         
         await Coupon.findByIdAndDelete(couponId)
-        res.redirect('/admin/coupons?deleted=true'); 
+        res.json({success:true}); 
     } catch (error) {
         console.error('error in delete coupon',error)
-        res.redirect('/admin/pageerror')
+        res.status(500).json({success:false})
     }
 }
+
+
+//this is to export to the userController to genreate referal coupon
+
+ const generateReferralCoupon = async (referrerId, discount = 50) => {
+    const code = `REF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    
+    const coupon = new Coupon({
+      name:code,
+      createdOn:new Date(),
+      startOn:new Date(),
+
+      discountType:'Fixed',
+      offer:discount,
+      expireOn: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // valid for 15 days
+      userId: referrerId,
+      isActive: true,
+      isReferrCoupon:true
+    });
+  
+    await coupon.save();
+    await User.updateOne({_id:referrerId},
+        {$inc:{referrCouponCount:1}})
+    };
 module.exports={
     getCoupenPage,
     postCouponDetails,
     getEditCoupon,
-    deleteCoupon
+    deleteCoupon,
+    generateReferralCoupon
 }

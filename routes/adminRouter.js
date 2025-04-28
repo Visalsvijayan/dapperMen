@@ -8,6 +8,7 @@ const productController=require('../controllers/admin/productController')
 const brandController=require('../controllers/admin/brandController')
 const orderController=require('../controllers/admin/orderController')
 const coupenController=require('../controllers/admin/coupenController')
+const salesController=require('../controllers/admin/salesController')
 const {userAuth,adminAuth}=require('../middlewares/auth');
 // const multer=require('multer');
 // const storage=require("../helpers/multer");
@@ -69,5 +70,10 @@ router.get('/coupons',adminAuth,coupenController.getCoupenPage)
 router.post('/coupons/addCoupon',adminAuth,coupenController.postCouponDetails)
 // router.put('/coupons/update/:id',adminAuth,coupenController.editCoupon)
  router.get('/coupons/editCoupon/:id',adminAuth,coupenController.getEditCoupon)
- router.get('/coupon/delete',adminAuth,coupenController.deleteCoupon)
+ router.post('/coupon/delete',adminAuth,coupenController.deleteCoupon)
+
+ //salesManagement
+ router.get('/sales',adminAuth,salesController. getSelesReportPage)
+ router.post('/sales-dashboard-data',adminAuth,salesController.salesDashboardData)
+ router.post('/salesTable',adminAuth,salesController.salesTableData)
 module.exports=router;

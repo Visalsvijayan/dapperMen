@@ -1,4 +1,6 @@
 <%- include("../../views/partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
     /* Improved checkout styling */
     .checkout-container {
@@ -250,11 +252,11 @@
                         <% if(data.length>0 && data[0].allItem && data[0].allItem.length > 0) { %>
                         <tr>
                             <td>Subtotal</td>
-                            <td id="subtotal">₹<%=data[0].grandTotal%> %></td>
+                            <td id="subtotal">₹<%=data[0].grandTotal%> </td>
                         </tr>
                         <tr>
                             <td>Shipping</td>
-                            <td><em>Free</em></td>
+                            <td id="shippingPrice"><em>₹<%=deliveryCharge%></em></td>
                         </tr>
                         <tr>
                             <td>Discount</td>
@@ -263,7 +265,10 @@
                         <tr>
                             <td>Total</td>
                             <td class="product-subtotal">
-                                <span id="totalValue">₹<%=data[0].grandTotal%> %></span>
+                                
+                                <span id="finalAmount">₹<%=finalAmount%></span>
+                                 
+                                           
                             </td>
                         </tr>
                        <%}else{%>
@@ -276,15 +281,36 @@
 
                 <!-- Coupon Section -->
                 <div class="coupon-section">
-                    <h5>Apply Coupon</h5>
-                    <div class="coupon-input">
-                        <input type="text" class="form-control" id="inputCoupon" placeholder="Enter coupon code">
-                        <button class="btn btn-primary" id="applyButton">Apply</button>
-                    </div>
-                    <div class="available-coupons">
-                        <h6>Available Coupons</h6>
-                        <p>No coupons available</p>
-                    </div>
+                     
+                    <div class="card p-3 mb-4 shadow-sm border-0" style="max-width: 500px;">
+                        <% if (coupons && coupons.length > 0) { %>
+                          <div class="d-flex align-items-center gap-3">
+                            <div class="flex-grow-1">
+                              <label for="couponSelect" class="form-label fw-semibold text-secondary">Apply Coupon</label>
+                              <select class="form-select rounded-3" id="couponSelect" name="type">
+                                <option selected disabled value="">Available Coupons</option>
+                                <% coupons.forEach((coupon) => { %>
+                                  <option value="<%= coupon.name %>">
+                                    <%if(coupon.discountType==='Percentage'){%>
+                                       <%= coupon.name %> - <%= coupon.offer %>% Off
+                                    <%}else{%>
+                                        <%= coupon.name %> - ₹<%= coupon.offer %> Off 
+                                    <%}%>      
+                                  </option>
+                                <% }) %>
+                              </select>
+                            </div>
+                      
+                            <div class="d-flex flex-column gap-4">
+                              <button class="btn btn-success" id="applyButton">Apply</button>
+                              <button class="btn btn-outline-primary btn-sm " id="clearCouponBtn">Clear</button>
+                            </div>
+                          </div>
+                        <% } else { %>
+                          <p class="text-muted">No coupons available</p>
+                        <% } %>
+                      </div>
+                      
                 </div>
 
                 <button type="button" class="btn-place-order" onclick="placeOrder()">Place Order</button>
@@ -372,7 +398,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 <script>
 
   //wallet status when click on the wallet payment
@@ -404,9 +431,16 @@
                     method:'DELETE',
                     success:(response)=>{
                         if(response.success){
+                            let itemCount 
+                            itemCount = response.remainingItems || 0;
                             Swal.fire('Removed!','Item has been removed','success')
-                            .then(()=>{
-                                location.reload();
+                            .then((itemCount)=>{
+                                if (response.remainingItems > 0) {
+                                    location.reload();  // Refresh if items remain
+                                } else {
+                                    window.location.href = '/shop';  // Redirect if empty
+                                }
+                                                    
                             })
                         }
                     },
@@ -424,11 +458,14 @@
         let payment = $("input[name='payment_option']:checked").val();
          
         let dscnt=document.getElementById('discount').textContent;
-        let discount=parseInt(dscnt.replace(/[^/\d.]/g,''));
-        const sum = document.getElementById("totalValue").textContent;
-        let numericValue = parseInt(sum.replace(/[^\d.]/g, ''));
+        let discount=parseInt(dscnt.replace(/[^/\d.]/g,'')) || 0 ;
+       
+        const sum = document.getElementById("subtotal").textContent;
+        let totalPrice= parseInt(sum.replace(/[^\d.]/g, ''));
+       
+        let amountText = document.getElementById('finalAmount').innerText;        
         const walletAmount=parseInt('<%= user.wallet.balance %>');
-         
+        let finalAmount = parseInt(amountText.replace('₹', '').trim());
  
         
         if (!payment) {
@@ -446,7 +483,7 @@
                 timer: 3000,
             });
             
-        } else if(payment === "cod" && numericValue > 1000){
+        } else if(payment === "cod" && finalAmount > 1000){
             Swal.fire({
                 title: 'COD Not Allowed!',
                 text: 'Orders above ₹1000 are not allowed for Cash on Delivery (COD).',
@@ -454,7 +491,7 @@
                 timer: 3000,
             });
              
-        }else if(payment==='wallet'&&walletAmount<numericValue){
+        }else if(payment==='wallet'&&walletAmount<finalAmount){
             
                 Swal.fire({
                     icon:'error',
@@ -472,29 +509,34 @@
             try {
                 if (payment === 'razorpay') {
                     // First create Razorpay order only
+                    const couponSelect = document.getElementById('couponSelect');
+                    const couponName = couponSelect ? couponSelect.value : null;
                     const response = await $.ajax({
                         url: '/order/razorpay',
                         method: 'POST',
                         data: {
-                            totalPrice: numericValue,
+                            totalPrice,
+                            finalAmount,
                             createdOn: new Date().getTime(),
                             date: new Date(),
                             addressId: address,
                             payment: payment,
-                            discount: discount
+                            discount: discount,
+                            couponName: couponName ? couponName : null
                         }
                     });
 
                     if (response.success) {
                         
-                        let finalAmount=numericValue-discount;
+                        
                         initiateRazorpay(
                             response.amount,
                             response.razorpayOrder,
                             response.orderId,
                             response.key_id,
                             {
-                                totalPrice: numericValue,
+                                totalPrice:totalPrice,
+ 
                                 
                                 createdOn: new Date().getTime(),
                                 date: new Date(),
@@ -513,18 +555,21 @@
                 } else {
                     // Wallet and COD — place order directly
                     let url = payment === 'wallet' ? '/order/wallet' : '/order/cod';
-
+                    const couponSelect = document.getElementById('couponSelect');
+                    const couponName = couponSelect ? couponSelect.value : null;
                     const response = await $.ajax({
                         url: url,
                         method: 'POST',
                         data: {
-                            totalPrice: numericValue,
+                            totalPrice,
+                            finalAmount,
                             createdOn: new Date().getTime(),
                             date: new Date(),
                             addressId: address,
                             payment: payment,
                             discount: discount,
-                            walletAmount
+                            walletAmount,
+                            couponName: couponName ? couponName : null
                         }
                     });
 
@@ -548,11 +593,7 @@
     }
   }
                 
-        
-        
-      
-    
-
+         
   function initiateRazorpay(amount, razorpayOrder, orderId, key_id, orderData) {
     const options = {
         key: key_id,
@@ -596,6 +637,38 @@
     rzp.open();
 }
 
+// to apply coupon
+document.getElementById('applyButton').addEventListener('click', async function () {
+    const couponName = document.getElementById('couponSelect').value;
+    const subtotal = parseFloat(document.getElementById('subtotal').textContent.replace('₹', '').trim());
+    const shipping = parseFloat(document.getElementById('shippingPrice').textContent.replace('₹', '').trim());
+    try {
+        if (couponName) {
+            const res = await fetch('/coupon/applyCoupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ couponName,subtotal}) 
+            });
+            const result = await res.json();
+            console.log(result);
+            if(result.success){
+                document.getElementById('discount').textContent=`₹${result.discount}`
+                document.getElementById('finalAmount').textContent=`₹${result.discountedPrice}`
+                
+            }
+        }
+        else{
+           console.log('coupen name not found')
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+//clear coupen
+document.getElementById('clearCouponBtn').addEventListener('click',()=>{
+      document.getElementById('discount').textContent=`₹ 0`
+                document.getElementById('finalAmount').textContent=`₹${'<%=finalAmount%>'}`
+})
 
 
 

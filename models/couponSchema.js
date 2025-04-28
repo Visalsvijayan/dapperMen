@@ -31,7 +31,8 @@ const couponSchema=new mongoose.Schema({
     },
     minimumPrice:{
         type:Number,
-        required:true
+        required:true,
+        default:0
     },
     maxDiscount:{
         type:Number,
@@ -42,10 +43,15 @@ const couponSchema=new mongoose.Schema({
         type:Boolean,
         default:true
     },
-    userId:[{
+    userId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
-    }]
+    },
+    isReferrCoupon:{
+        type:Boolean,
+        default:false
+    },
+    
 })
 
 const Coupon=mongoose.model("Coupon",couponSchema)

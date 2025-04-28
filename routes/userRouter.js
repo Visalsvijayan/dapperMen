@@ -89,4 +89,6 @@ router.delete('/wishlist/remove',userAuth,wishlistController.removeWishlistItem)
 //wallet management
 router.get('/wallet/addMoney',userAuth,walletController.getAddMoneyPage)
 router.post('/wallet/addMoney',userAuth,walletController.addMoney)
+//apply coupon
+router.post('/coupon/applyCoupon',userAuth,orderController.applyCoupon)
 module.exports=router;

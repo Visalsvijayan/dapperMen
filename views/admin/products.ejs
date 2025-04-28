@@ -5,6 +5,14 @@
         .container-product{
             margin-left: 250px;
         }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 100px 0;
+        }
+
     </style>
 </head>
 <div class="container-product">
@@ -81,28 +89,33 @@
                         <%}%>
                     </td>
                     <td>
-                        <button class="btn btn-info" style="width: 80px;">
-                            <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
-                        </button>
+                        <a href="/admin/editProduct?id=<%= data[i]._id %>&page=<%= currentPage %>" 
+                            class="btn btn-info text-white" 
+                            style="width: 80px; text-decoration: none;">
+                            Edit
+                         </a>
+                         
                     </td>
                 </tr>
             <%}%>   
             </tbody>
     
         </table>
-        <div class="container mt-3" >
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-                    <%for(let i=1;i<=totalpages;i++){%>
-                        <li class="page-item <%=(i===currentPage) ? 'active' : '' %>">
-                            <a class="page-link" href="?page=<%= i %>&search=<%= encodeURIComponent(search || '') %>"><%= i %></a>
-    
-                        </li>
-                    <%}%>    
-    
-                </ul>
-            </nav>
-        </div>
+        
+
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+              <a class="btn" href="/admin/products?page=<%=currentPage-1 %>&search=<%= encodeURIComponent(search || '') %> ">Prev</a>
+            <% } %>
+          
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <a class="btn <%= currentPage === i ? 'active' : '' %>" href="/admin/products?page=<%=i %>&search=<%= encodeURIComponent(search || '')%>"><%= i %></a>
+            <% } %>
+          
+            <% if (currentPage < totalPages) { %>
+              <a class="btn" href="/admin/products?page=<%=currentPage +1%>&search=<%= encodeURIComponent(search || '')%>">Next</a>
+            <% } %>
+          </div>
     </div>
     </div>
     </div>
@@ -136,7 +149,7 @@
                     
                     Swal.fire({
                         title: 'Offer added',
-                        text: 'The offer has been removed',
+                        text: 'The offer has been add successfully',
                         icon: 'success',
                         timer: 2000, // 
                         timerProgressBar: true, // Show a progress bar
@@ -147,7 +160,13 @@
                     
                 }
                 else{
-                    alert('failed')
+                    Swal.fire({
+                        title: 'Failed',
+                        text:response.message,
+                        icon: 'error',
+                       
+                         
+                    })
                 }
             },
              
@@ -175,9 +194,17 @@
                             },
                             success:(response)=>{
                                 if(response.status===true){
-                                    Swal.fire('Removed!','The offer has been removed','success');
-                                location.reload()
-
+                                    Swal.fire({
+                                        title: 'Offer Removed',
+                                        text: 'The offer has been removed successfully',
+                                        icon: 'success',
+                                        timer: 2000, // 
+                                        timerProgressBar: true, // Show a progress bar
+                                        showConfirmButton: false // Hide the "OK" button
+                                    }).then(()=>{
+                                        location.reload()
+                                    })
+             
                                 }else if(response.status===false){
                                     Swal.fire('failed removing offer')
                                 }

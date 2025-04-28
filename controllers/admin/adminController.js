@@ -9,7 +9,7 @@ const loadLogin=async(req,res)=>{
     if(req.session.admin){
         return res.redirect('/admin')
     }
-    res.render('admin-login')
+    res.render('admin-login',{msg:''})
 }
 const login=async(req,res)=>{
     try {
@@ -23,11 +23,11 @@ const login=async(req,res)=>{
 
             }
             else{
-                return res.redirect('/admin/login')
+                return res.render('admin-login', { msg: "Incorrect Password" });
             }
         }
         else{
-            return res.redirect('/admin/login')
+            return res.render('admin-login', { msg: "You Are Not Admin" });
 
         }
     } catch (error) {

@@ -339,7 +339,7 @@
                             <!-- Product Info -->
                             <div class="col-md-7">
                                 <div class="product-info">
-                                    <h1 class="product-title"><%=product.productName%></h1>
+                                    <h1 class="product-title"><%=product.productName%> </h1>
                                     <div class="product-brand">
                                         Brand: <a href="#"><%=product.brand%></a>
                                     </div>
@@ -353,8 +353,8 @@
                                         <% if(product.regularPrice && product.regularPrice !== product.salePrice) { %>
                                             <span class="original-price">₹<%=product.regularPrice%></span>
                                         <% } %>
-                                        <% if(totalOffer) { %>
-                                            <span class="discount-badge"><%=totalOffer%>% OFF</span>
+                                        <% if(finalOffer) { %>
+                                            <span class="discount-badge"><%=finalOffer%>% OFF</span>
                                         <% } %>
                                     </div>
 
@@ -428,6 +428,7 @@
             const quantityInput = document.getElementById('quantity');
             if (quantityInput) {
                 let currentValue = parseInt(quantityInput.value) || 1;
+                
                 quantityInput.value = currentValue + 1;
             }
         };

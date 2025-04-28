@@ -502,13 +502,19 @@
                <div class="card-body">
                  <h6 class="mb-3">Refer your friends and earn money!</h6>
                  <div class="input-group mb-3">
-                   <input type="text" class="form-control" value="https://example.com/refer/<%=user._id%>" id="referralLink" readonly>
+                  <input type="text" class="form-control" value="<%=user.referralCode%>" id="referralCode" readonly>
+                  <button class="btn btn-outline-secondary" type="button" onclick="copyReferralCode()">
+                    <i class="fi-rs-copy"></i>
+                  </button>
+                </div>
+                 <div class="input-group mb-3">
+                   <input type="text" class="form-control" value="http://localhost:3006/signup?ref=<%=user.referralCode%>" id="referralLink" readonly>
                    <button class="btn btn-outline-secondary" type="button" onclick="copyReferralLink()">
                      <i class="fi-rs-copy"></i>
                    </button>
                  </div>
                  <div class="alert alert-info">
-                   <strong>Earned:</strong> ₹0.00
+                   <strong>Earned:</strong> ₹<%= 50* user.referrCouponCount%>
                  </div>
                </div>
              </div>
@@ -574,6 +580,19 @@
   
   function copyReferralLink() {
     const copyText = document.getElementById("referralLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    
+    const originalText = copyText.value;
+    copyText.value = "Copied!";
+    setTimeout(() => {
+      copyText.value = originalText;
+    }, 2000);
+  }
+
+  function copyReferralCode() {
+    const copyText = document.getElementById("referralCode");
     copyText.select();
     copyText.setSelectionRange(0, 99999);
     document.execCommand("copy");

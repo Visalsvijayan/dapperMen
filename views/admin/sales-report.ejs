@@ -1,0 +1,323 @@
+<%- include("../../views/partials/admin/header") %>
+<style>
+  .maindiv{
+    margin-top: 60px;
+  }
+</style>
+<!-- Main wrapper with proper constraints -->
+<div id="admin-wrapper" class="container-fluid maindiv px-0" style="overflow-x: hidden;">
+  <!-- Main content area with fixed width calculation -->
+  <div class="main-content" style="margin-left: 250px; padding: 20px; max-width: calc(100% - 250px);">
+    
+    <!-- Filter and View Report Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>Sales Report Dashboard</h4>
+      <form action="/admin/salesTable" method="POST" onsubmit="return validateForm(event)">
+          <div class="d-flex align-items-center gap-2">
+          
+            <select class="form-select" id="sortBy" name="sortBy"   style="width: 150px">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+              <option value="custom">Custom</option>
+            </select>
+              <!-- Custom Date Range Input (hidden by default) -->
+          <div id="customDateRange" class=" " style="display: none ;">
+            <input type="date" id="startDate" name="startDate" class="form-control" />
+            <input type="date" id="endDate" name="endDate" class="form-control" />
+          </div>
+          
+          </div>
+        </div>
+        <div class="d-flex ">
+          <button class="btn btn-success " type="submit">View Report</button>
+        </div>
+      </form>
+      <div class="d-flex mb-3">
+        <button class="btn btn-primary ms-auto" id="applySort">Generate Report</button>
+
+      </div>
+   
+
+    <!-- Summary Cards - Now in proper grid -->
+    <div class="row g-3 mb-4 mx-0">
+      <div class="col-md-2 col-6">
+        <div class="card text-center shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-muted">Net Sales</h6>
+            <h5 id="netSale">₹0</h5>
+          </div>
+        </div>
+      </div>
+      <!-- Repeat for other cards with same structure -->
+      <div class="col-md-2 col-6">
+        <div class="card text-center shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-muted" >Total Orders</h6>
+            <h5 id="totalOrder">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="card text-center shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-muted">Products Sold</h6>
+            <h5 id="productSold">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="card text-center shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-muted"> Product Discount </h6>
+            <h5 id="productDiscount">₹0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="card text-center shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-muted">Coupon Discount</h6>
+            <h5 id="couponDiscount">₹0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="card text-center shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-muted">Avg. Order Value</h6>
+            <h5 id="average">₹0.00</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section with proper constraints -->
+    <div class="row g-4 mx-0">
+      <!-- Bar Chart with fixed height container -->
+      <div class="col-12">
+        <div class="card shadow-sm" style="overflow: hidden;">
+          <div class="card-header">Sales vs Discounts</div>
+          <div class="card-body" style="position: relative; height: 400px; padding: 15px;">
+            <canvas id="barChart" style="width: 100% !important; height: 100% !important;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie Charts in responsive grid -->
+    <div class="row g-4 mt-2 mx-0">
+       
+      <div class="col-lg-12">
+        <div class="card shadow-sm" style="overflow: hidden;">
+          <div class="card-header">Payment Method Distribution</div>
+          <div class="card-body" style="position: relative; height: 400px; padding: 15px;">
+            <canvas id="paymentPie"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+  </div>
+</div>
+
+<!-- Ensure footer is properly closed -->
+<%- include("../../views/partials/admin/footer") %>
+
+<!-- Chart.js and Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Initialize Charts with Responsive Settings -->
+<script>
+
+
+//validation of form 
+function validateForm(event){
+  const sortBy = document.getElementById('sortBy').value;
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  if(sortBy==='custom'){
+    if(!startDate&&!endDate){
+      event.preventDefault()
+      Swal.fire({
+        icon:'error',
+        title:"Select Dates",
+        text:"Please select starting and ending dates"
+      })
+      return false
+    }
+  }
+  return true
+
+ 
+}
+
+
+
+//apply sorting
+
+document.getElementById('sortBy').addEventListener('change', function () {
+  const sortValue = this.value;
+  if (sortValue === 'custom') {
+    document.getElementById('customDateRange').style.display = 'flex';
+  } else {
+    document.getElementById('customDateRange').style.display = 'none';
+  }
+});
+document.getElementById('applySort').addEventListener('click', function (event) {
+  event.preventDefault(); // Prevent page reload
+
+  const sortValue = document.getElementById('sortBy').value;
+
+  if (sortValue === 'custom') {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+
+    fetchData({ sort: sortValue, start: startDate, end: endDate });
+  } else {
+    fetchData({ sort: sortValue });
+  }
+});
+
+
+  let barChart;
+  let paymentPie;
+  let categoryPie;
+
+function fetchData(payload) {
+ 
+
+  fetch('/admin/sales-dashboard-data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Fetched data:", data);
+    // update chart or dashboard 
+    document.getElementById('netSale').innerText='₹' + data.netSale
+    document.getElementById('totalOrder').innerText= data.totalOrders
+    document.getElementById('productSold').innerText=  data.quantity
+    document.getElementById('productDiscount').innerText='₹' + data.netProductOffer
+    document.getElementById('couponDiscount').innerText='₹' + data.netCoupon
+    document.getElementById('average').innerText='₹' +Math.round(data.netSale/data.totalOrders)
+
+
+    updateBarChart(data.labels, data.salesData, data.totalDiscountData);
+    updatePaymentPieChart(data.paymentMethodData);
+
+
+
+  })
+  .catch(err => console.error("Error fetching data:", err));
+}
+
+
+
+ 
+  // Bar Chart with responsive settings
+function updateBarChart(labels, salesData, discountData) {
+    if (barChart) {
+      barChart.destroy();   
+    }
+
+    const ctx = document.getElementById('barChart').getContext('2d');
+    barChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels, 
+        datasets: [
+          {
+            label: 'Total Sales',
+            backgroundColor: '#4e73df',
+            data: salesData
+          },
+          {
+            label: 'Discounts Given',
+            backgroundColor: '#e74a3b',
+            data: discountData
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          }
+        }
+      }
+    });
+}
+
+  // Pie Chart 
+  function updatePaymentPieChart(paymentMethods) {
+   
+  const labels = paymentMethods.map(item => item.label);
+  const data = paymentMethods.map(item => item.count);
+
+   
+  const backgroundColors = ['#36b9cc', '#1cc88a', '#f6c23e'];
+
+  // Prepare the pie chart data
+  const paymentPieData = {
+    labels: labels, // 'cod', 'razorpay', 'wallet'
+    datasets: [{
+      data: data, 
+      backgroundColor: backgroundColors,
+    }]
+  };
+
+  // Check if pie chart already exists  
+  if (paymentPie) {
+    paymentPie.destroy();
+  }
+
+  // Create a new pie chart
+  const ctx = document.getElementById('paymentPie').getContext('2d');
+  paymentPie = new Chart(ctx, {
+    type: 'pie',
+    data: paymentPieData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
+
+
+    
+</script>
+
+<!-- Additional CSS to prevent overflow -->
+<style>
+   
+  
+  #admin-wrapper {
+    width: 100vw;
+  }
+  
+  .main-content {
+    min-width: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0 !important;
+      max-width: 100% !important;
+    }
+  }
+</style>

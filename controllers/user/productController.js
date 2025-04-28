@@ -14,12 +14,12 @@ const productDetails=async(req,res)=>{
         const findCategory=product.category;
         const categoryOffer=findCategory ? findCategory.categoryOffer||0 : 0
         const productOffer=product.productOffer||0;
-        const totalOffer=categoryOffer + productOffer;
+        const finalOffer=categoryOffer>productOffer ? categoryOffer:productOffer
         res.render('details-pro',{
             user:userData,
             product:product,
             quantity:product.quantity,
-            totalOffer:totalOffer,
+            finalOffer:finalOffer,
             category:findCategory
 
         })

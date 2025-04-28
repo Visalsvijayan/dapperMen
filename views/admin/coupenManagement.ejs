@@ -85,8 +85,8 @@
                           <i class="bi bi-pencil"></i>
                         </button>
 
-                        <button class="btn btn-sm btn-outline-danger" ">
-                         <a href="/admin/coupon/delete?id=<%=coupon._id%>"><i class="bi bi-trash"></i></a> 
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCoupon('<%=coupon._id%>')">
+                          <i class="bi bi-trash"></i>
                         </button>
 
                          
@@ -198,20 +198,33 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+        document.querySelector('[data-bs-target="#addCouponModal"]').addEventListener('click', function() {
+      document.getElementById('addCoupenForm').reset();
+      document.getElementById('couponId').value = '';
+       
+    });
     //validate the add coupen modal
     document.getElementById('addCoupenForm').addEventListener('submit',async function(e){
+      
       e.preventDefault();
+       
       
       document.getElementById('discountValueError').textContent='';
       document.getElementById('minimumError').textContent='';
       document.getElementById('maxDiscountError').textContent='';
       document.getElementById('startDateError').textContent='';
       document.getElementById('expiryDateError').textContent='';
+      document.getElementById('minimumError').textContent='';
+
 
       let hasError=false;
+
+ 
+
+
       const discountValue = parseFloat(document.getElementById('discountValue').value);
       const minPurchase = parseFloat(document.getElementById('minPurchase').value);
-      const maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
+      let maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
       const startDate = new Date(document.getElementById('startDate').value);
       const expiryDate = new Date(document.getElementById('expiryDate').value);
       const couponCode=document.getElementById('couponCode').value
@@ -234,6 +247,12 @@
       if(maxDiscount>minPurchase){
         document.getElementById('maxDiscountError').textContent = 'Maximum discount should be less than minimum purchase.';
         hasError=true;
+      }
+      if(discountType==='Fixed'){
+        const maxDis=document.getElementById('maxDiscount')
+        maxDis.disabled = true;
+        maxDis.value = '';
+
       }
       if (!isNaN(startDate) && !isNaN(expiryDate) && expiryDate <= startDate) {
       document.getElementById('expiryDateError').textContent = 'Expiry date must be after the starting date.';
@@ -296,7 +315,7 @@
     //edit coupon functions
     document.querySelectorAll('.editCouponBtn').forEach(button => {
   button.addEventListener('click', async (e) => {
-    const couponId = e.currentTarget.getAttribute('data-id');
+    let couponId = e.currentTarget.getAttribute('data-id') ;
     
     try {
       // Send request to get coupon data
@@ -307,6 +326,7 @@
       }
       
       const data = await res.json();
+      couponId=''
       
 
        
@@ -348,29 +368,66 @@
 
 //delete coupon
 
-const urlParams = new URLSearchParams(window.location.search);
-  const deleted = urlParams.get('deleted');
+  async function deleteCoupon(couponId) {
+    try {
+      const res=await fetch('/admin/coupon/delete',{
+        method:'POST',
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({couponId})
+        
+      })
+      const result=await res.json()
+        if(result.success){
+          Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'Coupon has been successfully deleted.',
+          confirmButtonColor: '#3085d6',
+          timer:2000,
+          showConfirmButton:false
+        })
+        .then(()=>location.reload())
 
-  if (deleted === 'true') {
-    Swal.fire({
-      icon: 'success',
-      title: 'Deleted!',
-      text: 'Coupon has been successfully deleted.',
-      confirmButtonColor: '#3085d6',
-      timer:2000,
-      showConfirmButton:false
-    });
+      }
+      else{
+          Swal.fire({
+          icon: 'error',
+          title: 'Oops!',
+          text: 'Failed to delete the coupon.',
+          confirmButtonColor: '#d33'
+        });
+
+      }
+
+    } catch (error) {
+      console.error('error in deleting coupon',error)
+    }
+    
   }
 
-  if (deleted === 'false') {
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops!',
-      text: 'Failed to delete the coupon.',
-      confirmButtonColor: '#d33'
-    });
+  
+
+ // this session is to disable the max discount when select Fixed as type
+  const discountTypeSelect = document.getElementById('discountType');
+  const maxDiscountInput = document.getElementById('maxDiscount');
+
+  function handleDiscountTypeChange() {
+    const selectedType = discountTypeSelect.value;
+
+    if (selectedType === 'Fixed') {
+      maxDiscountInput.disabled = true;
+      maxDiscountInput.value = '';
+    } else {
+      maxDiscountInput.disabled = false;
+    }
   }
 
+   
+  handleDiscountTypeChange();
+ 
+  discountTypeSelect.addEventListener('change', handleDiscountTypeChange);
 
-  </script>
+
+ 
+   </script>
  

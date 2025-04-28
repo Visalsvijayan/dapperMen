@@ -57,13 +57,15 @@
                             </div>
                             <div class="col-lg-4 mb-4">
                                 <label class="form-label">Brand</label>
+                                 
                                 <select class="form-select border" name="brand">
-                                    <%for(let i=0;i<brand.length; i++){%>
-                                        <option value="<%=brand[i].brandName%>" <%= brand[i].brandName%> === selectedBrand ? 'selected' : >
-                                            <%=brand[i].brandName%>
-                                        </option>
-                                    <%}%>   
-                                </select>
+                                    <% for (let i = 0; i < brand.length; i++) { %>
+                                      <option value="<%= brand[i].brandName %>" <%= brand[i].brandName === selectedBrand ? 'selected' : '' %>>
+                                        <%= brand[i].brandName %>
+                                      </option>
+                                    <% } %>   
+                                  </select>
+                                  
                                 <div id="brand-error" class="error-message"></div>
                             </div>
                             <div class="mb-4">
@@ -110,7 +112,7 @@
                                             <label class="form-label">Category</label>
                                             <select class="form-select border" style="width: 150px;" name="category">
                                                 <%for(let i=0;i<cat.length; i++){%>
-                                                    <option value="<%=cat[i].name%>">
+                                                    <option value="<%=cat[i].name%>" <%=cat[i].name===selectedCategory ? 'selected':''%>>
                                                         <%=cat[i].name%>
                                                     </option>
                                                 <%}%>   
@@ -190,6 +192,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <%- include("../../views/partials/admin/footer") %>
 
 <script>
@@ -262,11 +265,15 @@
         reader.readAsDataURL(input.files[0]);
     }
 
-    //for thumbnail image
-    document.getElementById("input1").addEventListener('change',handleFileSelect);
-    document.getElementById("input2").addEventListener('change',handleFileSelect);
-    document.getElementById("input3").addEventListener('change',handleFileSelect);
-    document.getElementById("input4").addEventListener('change',handleFileSelect);
+    
+    // document.getElementById("input1").addEventListener('change',handleFileSelect);
+    // document.getElementById("input2").addEventListener('change',handleFileSelect);
+    // document.getElementById("input3").addEventListener('change',handleFileSelect);
+    // document.getElementById("input4").addEventListener('change',handleFileSelect);
+     document.getElementById("input1").addEventListener('change', validateImageFileAndHandleSelect);
+    document.getElementById("input2").addEventListener('change', validateImageFileAndHandleSelect);
+    document.getElementById("input3").addEventListener('change', validateImageFileAndHandleSelect);
+    document.getElementById("input4").addEventListener('change', validateImageFileAndHandleSelect);
     let selectedImage = []; 
 
     
@@ -346,7 +353,40 @@
             element.innerText = '';
         });
     }
- 
+
+
+    // to prevent other files inputing in input feild
+    function validateImageFileAndHandleSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const maxSize = 2 * 1024 * 1024; // Optional: 2MB limit
+
+    if (!validTypes.includes(file.type)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid File',
+            text: 'Only JPG, JPEG, or PNG image files are allowed.',
+        });
+        event.target.value = ''; 
+        return;
+    }
+
+    if (file.size > maxSize) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'File Too Large',
+            text: 'Please upload images smaller than 2MB.',
+        });
+        event.target.value = '';
+        return;
+    }
+
+    // If valid, call  original handleFileSelect()
+    handleFileSelect(event);
+}
+    
 </script>
 
 

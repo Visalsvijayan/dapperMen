@@ -54,17 +54,23 @@ const  userSchema=new Schema({
         type:Date,
         default:Date.now
     },
-    referelCode:{
-        type:String
+    referralCode:{
+        type:String,
+        unique:true,
+        required:true
     
     },
-    redeemed:{
-        type:Boolean
-    },
-    redeemedUsers:{
+    referredUsers:[{
         type:Schema.Types.ObjectId,
         ref:"User"
+    }],
+    referredBy:{
+        type:Schema.Types.ObjectId,
+        ref:'User',
+        default:null
+
     },
+    
     searchHistory:[{
         category:{
             type:Schema.Types.ObjectId,
@@ -79,6 +85,11 @@ const  userSchema=new Schema({
         }
 
     }],
+    referrCouponCount:{
+        type:Number,
+        default:0
+
+    },
 
     wallet: {
         balance: {

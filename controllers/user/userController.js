@@ -3,6 +3,7 @@ const User=require('../../models/userSchema')
 const Category=require('../../models/categorySchema')
 const Product=require('../../models/productSchema')
 const Brand=require('../../models/brandSchema')
+const {generateReferralCoupon}=require('../../controllers/admin/coupenController')
 const bcrypt=require('bcrypt');
 const env=require('dotenv').config();
 const nodemailer=require('nodemailer')
@@ -99,7 +100,11 @@ const login=async (req,res)=>{
 
 const loadSignup=async(req,res)=>{
     try {
-        return res.render('signup',{message:""})
+        const referralCodeFromUrl=req.query.ref;
+        return res.render('signup',{
+            message:"",
+            referralCode:referralCodeFromUrl || ''
+        })
     } catch (error) {
         console.error("Error loading signup page:", error); // Log the error
         res.status(500).send("Internal Server Error");
@@ -122,7 +127,7 @@ const loadSignup=async(req,res)=>{
 const signup=async (req,res)=>{
     try {
         
-        const{name,phone,email,password,confirm_password}=req.body
+        const{name,phone,email,password,confirm_password,referralCode}=req.body
         if(password!==confirm_password){
             return res.render("signup",{message:"password do not match"})
         }
@@ -141,7 +146,7 @@ const signup=async (req,res)=>{
             return res.json('email-error')
         }
         req.session.userOtp=otp;
-        req.session.userData={email,password,name,phone}
+        req.session.userData={email,password,name,phone,referralCode}
         
         res.render('verify-otp')
         console.log("otp email:",otp)
@@ -211,21 +216,45 @@ const resendOtp=async (req,res)=>{
         
     }
 }
+
+//function to generate referal code
+const generateReferralCode = (name) => {
+    const firstName = name.trim().split(' ')[0].toUpperCase();
+    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `${firstName}-${randomStr}`;
+  };
+
 const verifyOtp=async(req,res)=>{
     try {
         const {otp}=req.body;
+        const user=req.session.userData
+        const refCode=generateReferralCode(user.name)
+        let referrer=null
+        if(user.referralCode){
+            referrer=await User.findOne({referralCode:user.referralCode})
+        }
         if(otp===req.session.userOtp){
-           const user=req.session.userData
+           
            const passwordHash=await securePassword(user.password);
            const saveUserData=new User({
             name:user.name,
             email:user.email,
             phone:user.phone,
-            password:passwordHash
+            password:passwordHash,
+            referralCode:refCode,
+            referredBy:referrer ? referrer._id : null,
 
            }) 
            await saveUserData.save();
-        //    req.session.user=saveUserData._id;
+          
+            if(user.referralCode &&referrer){
+ 
+                console.log('referrer present:',referrer)
+                await generateReferralCoupon(referrer._id);
+        
+            }
+           
+
            res.json({success:true,redirectUrl:"/login"})
    
         }
@@ -463,8 +492,6 @@ module.exports={loadHomepage,
     loadShoppingPage,
     filterProduct,
      
-   
-    
     
     
 }
