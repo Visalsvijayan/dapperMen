@@ -1,4 +1,14 @@
 <%- include("../../views/partials/user/header") %>
+<style>
+    .productImg{
+    width: 200px;
+    height: 200px;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+</style>
 <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css">
 <main class="main">
     <div class="page-header breadcrumb-wrap">
@@ -30,7 +40,7 @@
                                     <% var x = 0 %>
                                     <% for (let i = 0; i < data.length; i++) { %>
                                         <tr id="item-<%=data[i].productDetails._id%>">
-                                            <td class="image product-thumbnail">
+                                            <td class="productImg">
                                                 <img src="/uploads/product-images/<%= data[i].productDetails.productImage[0] %>" alt="#" />
                                             </td>
                                             <td class="product-des product-name">
@@ -101,15 +111,19 @@
 
                                     <tr>
                                         <td class="cart_total_label">Shipping</td>
-                                        <td class="cart_total_amount"> <i class="ti-gift mr-5"></i> Free Shipping
+                                        <td class="cart_total_amount"> <i class="ti-gift mr-5"></i>₹50
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Total</td>
                                         <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">₹
+                                            <%if(grandTotal){%>
                                                 <text id="total">
                                                     <%= grandTotal %>
                                                 </text>
+                                            <%}else{%>
+                                                0
+                                            <%}%>        
                                             </span></td>
                                     </tr>
                                 </tbody>
@@ -240,8 +254,9 @@
                                 showConfirmButton: false,
                                 timer: 1500  
                             })
+                            .then(()=>location.reload())
                              
-                            document.getElementById(`item-${productId}`).remove();
+                            // document.getElementById(`item-${productId}`).remove();
                            
                         }
                     },

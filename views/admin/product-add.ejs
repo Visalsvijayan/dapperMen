@@ -24,8 +24,12 @@
        
     }
     .image-preview {
-        width: 100%;
-        height: 200px;
+        
+        height: auto;
+        width: auto;
+        max-width: 500px;
+        max-height: 500px;
+
         border: 1px solid #ddd;
         display: flex;
         justify-content: center;
@@ -34,9 +38,12 @@
         margin-bottom: 10px;
     }
     .image-cropper img {
-    max-width: 300px;  /* Adjust this to the desired size */
-    max-height: 200px; /* Adjust this to the desired size */
-    object-fit: cover;
+     
+    width: auto;
+    height: auto;
+    max-width: 500px;
+    max-height: 500px;
+    object-fit: contain;
 }
 </style>
 
@@ -144,7 +151,7 @@
                                     onchange="viewImage1(event),viewImage(event,1)">
                                     <div id="images-error-1" class="error-message"></div>
                                 </div>
-                                <div class="image-cropper d-flex align-items-center " style="display: none; ">
+                                <div class="image-cropper d-flex flex-column align-items-center " style="display: none; ">
                                     <img src="" alt="" id="croppedImg1">
                                     <button type="button" id="saveButton1"class="btn-sm btn-primary">Save</button>
                                 </div>
@@ -157,7 +164,7 @@
                                     onchange="viewImage2(event),viewImage(event,2) ">
                                     <div id="images-error" class="error-message"></div>
                                 </div>
-                                <div class="image-cropper d-flex align-items-center " style="display: none;  ">
+                                <div class="image-cropper d-flex flex-column align-items-center " style="display: none;  ">
                                     <img src="" alt="" id="croppedImg2">
                                     <button type="button" id="saveButton2"class="btn-sm btn-primary">Save</button>
                                 </div>
@@ -170,7 +177,7 @@
                                     onchange="viewImage3(event),viewImage(event,3)">
                                     <div id="images-error" class="error-message"></div>
                                 </div>
-                                <div class="image-cropper d-flex align-items-center " style="display: none;  ">
+                                <div class="image-cropper d-flex flex-column align-items-center " style="display: none;  ">
                                     <img src="" alt="" id="croppedImg3"   >
                                     <button type="button" id="saveButton3"class="btn-sm btn-primary">Save</button>
                                 </div>
@@ -182,7 +189,7 @@
                                     onchange="viewImage4(event),viewImage(event,4)">
                                     <div id="images-error" class="error-message"></div>
                                 </div>
-                                <div class="image-cropper d-flex align-items-center " style="display: none; ">
+                                <div class="image-cropper d-flex flex-column align-items-center " style="display: none; ">
                                     <img src="" alt="" id="croppedImg4">
                                     <button type="button" id="saveButton4"class="btn-sm btn-primary">Save</button>
                                 </div>

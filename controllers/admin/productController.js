@@ -47,7 +47,7 @@ const addProducts = async (req, res) => {
 
                     // Resize and save image
                     await sharp(originalImagePath)
-                        .resize({ width: 300, height: 200 })
+                        .resize({ width: 500, height: 500 })
                         .toFile(resizedImagePath);
 
                     images.push(resizedFilename);
@@ -94,7 +94,7 @@ const getAllProducts=async(req,res)=>{
     try {
         const search=req.query.search || "";
         const page=parseInt(req.query.page) || 1;
-        const limit=4;
+        const limit=5;
        
         const productData=await Product.find({
             $or:[
@@ -207,8 +207,9 @@ const removeProductOffer = async (req, res) => {
 const blockProduct=async (req,res)=>{
     try {
         let id=req.query.id
+        let page=req.query.page;
         await Product.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.redirect('/admin/products')
+        res.redirect(`/admin/products?page=${page}`)
     } catch (error) {
         console.error('error in block the product',error)
         res.status(500).redirect('/admin/pageNotFound');
@@ -220,8 +221,9 @@ const blockProduct=async (req,res)=>{
 const unblockProduct=async(req,res)=>{
     try {
         let id=req.query.id;
+        let page=req.query.page;
         await Product.updateOne({_id:id},{$set:{isBlocked:false}})
-        res.redirect('/admin/products')
+        res.redirect(`/admin/products?page=${page}`)
     } catch (error) {
         res.status(500).redirect('/admin/pageNotFound');
     }
@@ -258,71 +260,68 @@ const editProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const updates = req.body;
-        const currentPage=parseInt(req.query.page) ||1
+        const currentPage = parseInt(req.query.page) || 1;
+
         const updatedIndexes = updates.updatedIndexes
-                            ? updates.updatedIndexes.split(',').map(i => parseInt(i))
-                            : [];
-         
+            ? updates.updatedIndexes.split(',').map(i => parseInt(i))
+            : [];
+
         const existingProduct = await Product.findById(productId);
-        if (!existingProduct) {
-            return res.status(404).json("Product not found");
-        }
+        if (!existingProduct) return res.status(404).json("Product not found");
+
         const duplicateProduct = await Product.findOne({
             productName: updates.productName,
             _id: { $ne: productId }
         });
-        if (duplicateProduct) {
-            return res.status(400).json("Product name already exists");
-        }
+        if (duplicateProduct) return res.status(400).json("Product name already exists");
 
-        // Validate category
         const categoryId = await Category.findOne({ name: updates.category });
-        if (!categoryId) {
-            return res.status(400).json("Invalid category name");
-        }
+        if (!categoryId) return res.status(400).json("Invalid category name");
 
-       
         let images = [...existingProduct.productImage];
-        
-         
-        if (req.files && req.files.length > 0) {
-           
-        for (let i = 0; i < req.files.length; i++) {
-            const file = req.files[i];
-            const replaceIndex = updatedIndexes[i];   
-        
-            const originalImagePath = file.path;
-            const resizedFilename = `resized-${Date.now()}-${file.filename}`;
-            const resizedImagePath = path.join('public', 'uploads', 'product-images', resizedFilename);
-        
-            await sharp(originalImagePath)
-                .resize({ width: 300, height: 200 })
-                .toFile(resizedImagePath);
-        
-            if (
-                replaceIndex !== undefined &&
-                !isNaN(replaceIndex) &&
-                replaceIndex >= 0 &&
-                replaceIndex < images.length
-            ) {
-                // Delete old image
-                const oldImagePath = path.join('public', 'uploads', 'product-images', images[replaceIndex]);
-                if (fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath);
-                }
-                 
-                images[replaceIndex] = resizedFilename;
-            } else {
-               
-                images.push(resizedFilename);
-            }
-          
-            fs.unlinkSync(originalImagePath);
-        }
- 
-    }
 
-        // Update product data
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                const file = req.files[i];
+                const replaceIndex = updatedIndexes[i];
+
+                const originalImagePath = file.path;
+                const resizedFilename = `resized-${Date.now()}-${file.filename}`;
+                const resizedImagePath = path.join('public', 'uploads', 'product-images', resizedFilename);
+
+                await sharp(originalImagePath)
+                    .resize({ width: 500, height: 500 })
+                    .toFile(resizedImagePath);
+
+                // Replace or push image
+                if (
+                    replaceIndex !== undefined &&
+                    !isNaN(replaceIndex) &&
+                    replaceIndex >= 0 &&
+                    replaceIndex < images.length
+                ) {
+                    // Delete old image
+                    const oldImagePath = path.join('public', 'uploads', 'product-images', images[replaceIndex]);
+                    if (fs.existsSync(oldImagePath)) {
+                        fs.unlink(oldImagePath, (err) => {
+                            if (err) console.error("Failed to delete old image:", err.message);
+                        });
+                    }
+                    images[replaceIndex] = resizedFilename;
+                } else {
+                    images.push(resizedFilename);
+                }
+
+                // Delete temp original uploaded image
+                if (fs.existsSync(originalImagePath)) {
+                    fs.unlink(originalImagePath, (err) => {
+                        if (err) console.error("Failed to delete original image:", err.message);
+                    });
+                }
+            }
+        }
+
+        // Prepare update object
         const updatedProduct = {
             productName: updates.productName,
             description: updates.descriptionData,
@@ -330,7 +329,7 @@ const editProduct = async (req, res) => {
             category: categoryId._id,
             regularPrice: updates.regularPrice,
             salePrice: updates.salePrice,
-            offerAmount:(updates.regularPrice)-(updates.salePrice),
+            offerAmount: updates.regularPrice - updates.salePrice,
             quantity: updates.quantity,
             size: updates.size,
             color: updates.color,
@@ -338,21 +337,20 @@ const editProduct = async (req, res) => {
             updatedOn: new Date()
         };
 
-        // Save updated product
-        await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
-        
-        return res.redirect(`/admin/products?page=${currentPage}`);
+        // Save update
+        await Product.findByIdAndUpdate(productId, updatedProduct);
 
+        return res.redirect(`/admin/products?page=${currentPage}`);
     } catch (error) {
         console.log('Error updating product:', error);
         return res.redirect('/admin/pageerror');
     }
 };
- 
+
  
 const getStockPage = async (req, res) => {
     try {
-      const perPage = 4;  
+      const perPage = 6;  
       const page = parseInt(req.query.page) || 1;
       const search = req.query.search || '';
   

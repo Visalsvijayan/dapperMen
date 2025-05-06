@@ -7,7 +7,7 @@ const getOrdersPage=async(req,res)=>{
   
     try {
         const { search = '', status = '', sort = '', page = 1 } = req.query;
-        const perPage = 3;
+        const perPage = 7;
         const currentPage = parseInt(page) || 1;
     
         const matchStage = {};
@@ -111,7 +111,13 @@ const UpdateOrderStatus=async(req,res)=>{
     try {
         const {orderId}=req.params;
         const {status}=req.body;
-        await Order.findByIdAndUpdate(orderId,{status});
+        if(status==='Delivered'){
+          const deliverdAt=new Date();
+          await Order.findByIdAndUpdate(orderId,{status,deliverdAt},{ runValidators: true });
+          return res.json({success:true});
+
+        }
+        await Order.findByIdAndUpdate(orderId,{status},{ runValidators: true });
         res.json({success:true});
         
     } catch (error) {
@@ -158,7 +164,7 @@ const approveReturnOrder=async(req,res)=>{
 const rejectReturnOrder=async(req,res)=>{
     try {
         const {orderId}=req.params;
-        await Order.findByIdAndUpdate(orderId, { status: 'Reject return product' });
+        await Order.findByIdAndUpdate(orderId, { status: 'Reject Return Request' });
         res.json({ success: true });
         
     } catch (error) {

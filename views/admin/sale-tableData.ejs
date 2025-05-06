@@ -38,8 +38,21 @@ td {
     <h4 class="text-center mb-4">Sales Report</h4>
 
     <div class="mb-3">
-      <p><strong>Report Range:</strong>–</p>
-      <p><strong>Generated On:</strong><%new Date().toLocaleDateString('en-GB')%></p>
+      <p><strong>Report Range:</strong>–
+        <%if(sortBy==='custom'){%>
+          <%=startDate%> - <%=endDate%>
+        <%}else if(sortBy==='weekly'){%>
+          Weekly Report 
+        <%}else if(sortBy==='monthly'){%>
+          Monthly Report
+        <%}else if(sortBy==='daily'){%>
+          Daily Roprt 
+        <%}else{%>
+          Yearly Report
+        <%}%>     
+        
+      </p>
+      <p><strong>Generated On:</strong><%=new Date().toLocaleDateString('en-GB')%></p>
     </div>
 
     <div class="table-responsive mb-5">
@@ -63,7 +76,11 @@ td {
             <td>₹<%=salesSummery[0].netProductOffer%></td>
             <td><strong>Avg. Order Value</strong></td>
             <% if (salesSummery.length > 0) { %>
-              <% const avgOrderValue = salesSummery[0].totalOrder > 0 ? (salesSummery[0].netSale / salesSummery[0].totalOrder) : 0; %>
+              <% 
+              const avgOrderValue = salesSummery[0].totalOrder > 0 
+                ? Math.round((salesSummery[0].netSale / salesSummery[0].totalOrder) * 100) / 100 
+                : 0; 
+              %>
               <td>₹<%= avgOrderValue %></td>
             <% } %>
           </tr>

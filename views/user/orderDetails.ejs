@@ -158,14 +158,14 @@
         margin-bottom: 20px;
         color: #222;
         padding-bottom: 10px;
-        border-bottom: 1px solid #e0e0e0;
+        /* border-bottom: 1px solid #e0e0e0; */
     }
     
     .product-card {
         display: flex;
         gap: 20px;
         padding: 15px 0;
-        border-bottom: 1px solid #e0e0e0;
+        /* border-bottom: 1px solid #e0e0e0; */
     }
     
     .product-card:last-child {
@@ -329,9 +329,7 @@
   transform: translateX();
 }
 
-/* .status-step.active:not(:last-child)::after {
-  background-color: green;
-} */
+ 
 .status-step.line-active:not(:last-child)::after {
   background-color: green;
 }
@@ -385,6 +383,9 @@
     margin-bottom: 8px;
     line-height: 1.4;
 }
+a{
+    text-decoration: none;
+}
 
 
 
@@ -402,6 +403,8 @@
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
 <div class="order-details-fullwidth"  >
     <div class="breadcrumb">
@@ -427,32 +430,13 @@
 
                 
                 </div>
-                <%if(orders.status!=='Cancelled'){%>
-                <!-- <div class="status-display">
-                    <div class="status-title">Order Status</div>
-                    <div class="status-timeline">
-                        <div class="status-step active">
-                            <div class="status-indicator">1</div>
-                            <div class="status-label">PENDING</div>
-                        </div>
-                        <div class="status-step">
-                            <div class="status-indicator">2</div>
-                            <div class="status-label">PROCESSING</div>
-                        </div>
-                        <div class="status-step">
-                            <div class="status-indicator">3</div>
-                            <div class="status-label">SHIPPED</div>
-                        </div>
-                        <div class="status-step">
-                            <div class="status-indicator">4</div>
-                            <div class="status-label">DELIVERED</div>
-                        </div>
-                    </div>
-                </div> -->
+                <!-- the status bar-->
+                <%if(orders.status!=='Cancelled'&&orders.status!=='Reject Return Request'){%>
+                 
                 <div class="status-display">
                     <div class="status-title">Order Status</div>
                     <div class="" style="display: flex;" >
-                        <% const statusSteps = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Return request', 'Returned']; %>
+                        <% const statusSteps = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Return Request', 'Returned']; %>
                         <% const currentStatusIndex = statusSteps.indexOf(orders.status.trim()); %>
                 
                         <% statusSteps.forEach((step, index) => { %>
@@ -466,9 +450,17 @@
                 <%}else{%>
                     <div class="w-100 position-relative my-4" style="height: 4px; background-color: #dc3545; border-radius: 2px;">
                         <!-- Cancelled point at the end -->
-                        <div class="position-absolute" style="top: 50%; right: 0; transform: translate(50%, -50%); text-align: center;">
+                        <div class="position-absolute" style="top: 50%; right:40px; transform: translate(50%, -50%); text-align: center;">
                           <div class="bg-danger rounded-circle" style="width: 16px; height: 16px;"></div>
-                          <div class="text-danger fw-bold mt-1">Cancelled</div>
+                          
+                          <%if(orders.status==='Cancelled'){%>
+                             <div class="text-danger fw-bold mt-1"><strong>Cancelled</strong></div>
+                          <%}else if(orders.status==='Reject Return Request'){%>
+                             <div class="text-danger fw-bold mt-1"><strong>Reject return request</strong></div>
+                          <%}%>   
+
+                            
+
                         </div>
                       </div>
                 <%}%>      
@@ -478,6 +470,8 @@
         <div class="order-content">
             <div class="product-section">
                 <%orders.orderItems.forEach(item=>{%>
+                    
+                    
                     <div class="section-title">Product Details</div>
                     
                     <div class="product-card">
@@ -499,13 +493,31 @@
                             <div class="product-spec">
                                 <span class="spec-label">Status:</span>
                                 <span class="spec-value"><button style="background-color: rgb(248, 154, 12); border-radius: 20px ;color: white;">
-                                    
-                                    <%=orders.status%>
+                                    <%if(item.productStatus==='Cancelled'){%>
+                                         Cancelled
+                                    <%}else{%>
+                                      <%=orders.status%>
+                                    <%}%>  
                                 </button></span>
                             </div>
+                            <%if(orders.orderItems.length>1 &&( !['Cancelled','Delivered','Returned','Return Request','Reject Return Request'].includes(orders.status))){ %> 
+                                <%if(item.productStatus!=='Cancelled'){%>
+                                <div class="d-flex">
+                                    <button  onclick="cancelSingleProduct('<%= orders._id %>','<%= item.product._id%>',event)" class="btn btn-danger ms-auto py-1 px-2" style="font-size: 0.8rem;">Cancel</button>
+                                </div>
+                                <%}%>
+                            <%}%>
+
+                             
                         </div>
                     </div>
                <%})%> 
+               <div>
+                 <%if(orders.status==='Delivered'){%>
+                    <p><strong>Product Delivered:  <%= new Date(orders.deliverdAt).toLocaleDateString('en-GB') %>
+                    </strong></p>
+                 <%}%>   
+               </div>
             </div>
             
             <div class="summary-section">
@@ -570,13 +582,13 @@
     <div class="action-buttons">
          
         
-        <button class="btn btn-cancel" 
+        <button class="btn btn-danger" 
             onclick="confirmCancelOrder('<%= orders._id %>', event)"
-                <% if (orders.status === 'Cancelled') { %> 
+                <% if(['Cancelled','Delivered','Returned','Return Request','Reject Return Request'].includes(orders.status)){ %> 
                     disabled style="opacity: 0.5; pointer-events: none;" 
                 <% } %>>
             <i class="fas fa-times-circle"></i>
-            <a style="color: white;" href="">CANCEL ORDER</a> 
+            CANCEL ORDER
         </button>
 
 
@@ -584,12 +596,14 @@
             <i class="fa-solid fa-download"></i>DOWNLOAD INVOICE
         </button>
         <%if(orders.status==='Delivered'){%>
-        <button id="return-Product" class="btn btn-primary"><i class="fas fa-undo"></i>RETURN PRODUCT</button>
+            <button id="return-Product" class="btn btn-primary"><i class="fas fa-undo"></i>RETURN PRODUCT</button>
         <%}%>
     </div>
    
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -599,7 +613,7 @@
         event.preventDefault();
         Swal.fire({
             title: 'Are you sure?',
-            text: "Do you really want to cancel this product?",
+            text: "Do you really want to cancel this Order?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#e74c3c',
@@ -689,7 +703,7 @@
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        status: 'Return request',
+                        status: 'Return Request',
                         reason: reason
                     }),
                 });
@@ -733,6 +747,56 @@
     }
 });
 
+function cancelSingleProduct(orderId,productId,event){
+    event.preventDefault();
+    Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to cancel this product?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, cancel it!'
+        })
+        .then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/orders/${orderId}/items/${productId}/cancel`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message === 'Product cancelled successfully') {
+                    Swal.fire(
+                        'Cancelled!',
+                        'The product has been cancelled.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Failed!',
+                        data.message || 'Something went wrong.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error cancelling product:', error);
+                Swal.fire(
+                    'Error!',
+                    'Something went wrong.',
+                    'error'
+                );
+            });
+        }
+    });
+
+
+}
 
 
 </script>

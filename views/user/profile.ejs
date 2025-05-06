@@ -388,7 +388,8 @@
                               </td>
                               <td>
                                 <button class="btn btn-success"><a style="color: white;" href="/order-Details?orderId=<%=order.orderId%>">View Details</a></button>
-                                <%if(order.status!=='Cancelled'&&order.status!=='Deliverd'){%>
+                                <% if(!['Cancelled','Delivered','Returned','Return Request','Reject Return Request'].includes(order.status)){ %> 
+
                                   <button class="btn btn-danger" onclick="confirmCancelOrder(event, '<%= order.oid %>')">Cancel Order</button>
 
 
@@ -408,14 +409,41 @@
                    <% if (totalPages > 1) { %>
                     <nav aria-label="Order pagination" class="mt-3">
                       <ul class="pagination justify-content-center">
-                        <% for (let i = 1; i <= totalPages; i++) { %>
+                  
+                        <!-- Previous Button -->
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                          <a class="page-link" href="/userProfile?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>#orders">Prev</a>
+                        </li>
+                  
+                        <% 
+                          
+                          const maxPagesToShow = 3;
+                          let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                          let endPage = startPage + maxPagesToShow - 1;
+                  
+                          
+                          if (endPage > totalPages) {
+                            endPage = totalPages;
+                            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                          }
+                        %>
+                  
+                        <!-- Page Numbers -->
+                        <% for (let i = startPage; i <= endPage; i++) { %>
                           <li class="page-item <%= currentPage === i ? 'active' : '' %>">
                             <a class="page-link" href="/userProfile?page=<%= i %><%= search ? '&search=' + search : '' %>#orders"><%= i %></a>
                           </li>
                         <% } %>
+                  
+                        <!-- Next Button -->
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                          <a class="page-link" href="/userProfile?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>#orders">Next</a>
+                        </li>
+                  
                       </ul>
                     </nav>
                   <% } %>
+                  
                   
                     
                  </div>
@@ -479,16 +507,41 @@
                    </table>
                    <!--pagination for wallet histroy session-->
                    <% if (tpages > 1) { %>
-                    <nav aria-label="Order pagination" class="mt-3">
+                    <nav aria-label="Wallet pagination" class="mt-3">
                       <ul class="pagination justify-content-center">
-                        <% for (let i = 1; i <= tpages; i++) { %>
+                  
+                        <!-- Previous Button -->
+                        <li class="page-item <%= walltCurrentPage === 1 ? 'disabled' : '' %>">
+                          <a class="page-link" href="/userProfile?walltPage=<%= walltCurrentPage - 1 %>#wallet-history">Prev</a>
+                        </li>
+                  
+                        <% 
+                          const maxWalletPages = 3;
+                          let startWalletPage = Math.max(1, walltCurrentPage - Math.floor(maxWalletPages / 2));
+                          let endWalletPage = startWalletPage + maxWalletPages - 1;
+                  
+                          if (endWalletPage > tpages) {
+                            endWalletPage = tpages;
+                            startWalletPage = Math.max(1, endWalletPage - maxWalletPages + 1);
+                          }
+                        %>
+                  
+                        <!-- Page Numbers -->
+                        <% for (let i = startWalletPage; i <= endWalletPage; i++) { %>
                           <li class="page-item <%= walltCurrentPage === i ? 'active' : '' %>">
                             <a class="page-link" href="/userProfile?walltPage=<%= i %>#wallet-history"><%= i %></a>
                           </li>
                         <% } %>
+                  
+                        <!-- Next Button -->
+                        <li class="page-item <%= walltCurrentPage === tpages ? 'disabled' : '' %>">
+                          <a class="page-link" href="/userProfile?walltPage=<%= walltCurrentPage + 1 %>#wallet-history">Next</a>
+                        </li>
+                  
                       </ul>
                     </nav>
                   <% } %>
+                  
                  </div>
                </div>
              </div>

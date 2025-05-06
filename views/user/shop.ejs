@@ -312,10 +312,7 @@
  <section class="shop-page container">
    <div class="shop-topbar">
      <div class="search-bar">
-       <!-- <form action="/search" method="POST" class="search-form">
-         <input type="text" name="query" placeholder="Search items..." class="search-input" />
-         <button type="submit" class="search-button">Search</button>
-       </form> -->
+        
        
        <div class="shop-topbar">
         <div class="search-bar">
@@ -434,11 +431,24 @@
      <main class="product-grid">
         <%for(let i=0;i<products.length;i++){%>
          <div class="product-card">
-           <%if(user.wishlist.includes(products[i]._id)){%>
-              <span class="wishlist-btn" onclick="addToWishlist('<%=products[i]._id%>',this)"><i class="fas fa-heart" style="color: red;"></i></span>
-           <%}else{%>
-              <span class="wishlist-btn" onclick="addToWishlist('<%=products[i]._id%>',this)"><i class="far fa-heart" style="color: grey;"></i></span>
-           <%}%> 
+           
+          <% if (user) { %>
+              <% if (user.wishlist.includes(products[i]._id)) { %>
+                <span class="wishlist-btn" onclick="addToWishlist('<%= products[i]._id %>', this)">
+                  <i class="fas fa-heart" style="color: red;"></i>
+                </span>
+              <% } else { %>
+                <span class="wishlist-btn" onclick="addToWishlist('<%= products[i]._id %>', this)">
+                  <i class="far fa-heart" style="color: grey;"></i>
+                </span>
+              <% } %>
+          <% } else { %>
+            <span class="wishlist-btn" onclick="location.href='/login'">
+              <i class="far fa-heart" style="color: grey;"></i>
+            </span>
+          <% } %>
+
+
            
            <a href="/productDetails?id=<%=products[i]._id%>">
              <img src="/uploads/product-images/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>" >
@@ -446,7 +456,12 @@
              <p><%=products[i].brand%></p>
              <p>Price: ₹<%=products[i].salePrice.toLocaleString('en-IN')%> <span class="text-muted"><strike>₹ <%=products[i].regularPrice.toLocaleString('en-IN')%></strike></span></p>
            </a>
-           <button class="add-to-cart-btn" onclick="addToCart('<%=products[i]._id%>')">Add to Cart</button>
+           <%if(user){%>
+              <button class="add-to-cart-btn" onclick="addToCart('<%=products[i]._id%>')">Add to Cart</button>
+           <%}else{%>
+              <button class="add-to-cart-btn" onclick="location.href='/login'">Add to Cart</button>
+           <%}%>
+
          </div>
          <%}%>
      </main>

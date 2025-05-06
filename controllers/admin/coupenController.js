@@ -26,48 +26,7 @@ const getCoupenPage=async(req,res)=>{
         
     }
 }
-
-// const postCouponDetails=async(req,res)=>{
-//     try {
-        
-//         const data=req.body
-//         console.log('data here:',data)
-//         const couponName=data.code;
-//         const newCoupon=new Coupon({
-//             name:data.code,
-//             createdOn:new Date(),
-//             startOn:data.start,
-//             expireOn:data.expiry,
-//             discountType:data.type,
-//             offer:data.value,
-//             minimumPrice:data.minimumPurchase,
-//             maxDiscount:data.maxDiscount,
-//             isActive:true
-            
-//         })
-//         if(data.couponId){
-//             await Coupon.findOneAndUpdate()
-
-//         }
-//         else{
-//             const isExist=await Coupon.findOne({name:couponName})
-//             if(isExist){
-//                 return res.json({success:false,msg:"coupon with same name already exist"})
-//             }
-            
-            
-            
-//             await newCoupon.save();
-    
-//             res.json({success:true})
-
-//         }
-       
-//     } catch (error) {
-//         console.error('error in posting coupen',error)
-//         res.status(500).json({success:false})
-//     }
-// }
+ 
 
 const postCouponDetails = async (req, res) => {
     try {
@@ -172,6 +131,7 @@ const deleteCoupon=async(req,res)=>{
 
       discountType:'Fixed',
       offer:discount,
+      minimumPrice:500,
       expireOn: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // valid for 15 days
       userId: referrerId,
       isActive: true,

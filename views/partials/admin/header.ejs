@@ -1,235 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Male Fashion - Admin Panel</title>
-  <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-  <link rel="icon" href="assets/img/kaiadmin/favicon.ico" type="image/x-icon" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
 
-  <!-- Fonts and icons -->
-  <script src="assets/js/plugin/webfont/webfont.min.js"></script>
-  <script>
-    WebFont.load({
-      google: { families: ["Public Sans:300,400,500,600,700"] }
-    });
-  </script>
-
-  <!-- CSS Files -->
-  <link rel="stylesheet" href="/admin-css/bootstrap.min.css" />
-  <link rel="stylesheet" href="/admin-css/plugins.min.css" />
-  <link rel="stylesheet" href="/admin-css/kaiadmin.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Bootstrap & Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/admin-css/categoryManagement.css">
-  
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-  
+
   <style>
-     
-    .wrapper {
-      display: flex;
-      height: 100vh;
+    /* Layout isolation for reuse */
+    .admin-layout * {
+      box-sizing: border-box;
     }
-    .sidebar {
+
+    .admin-layout {
+      font-family: "Public Sans", sans-serif;
+    }
+
+    .admin-layout .sidebar {
       width: 250px;
-      transition: width 0.3s ease;
+      background-color: #343a40;
+      min-height: 100vh;
       position: fixed;
-      height: 100vh;
-      overflow: hidden;
-      background: #343a40;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+      transition: left 0.3s ease, width 0.3s ease;
+      z-index: 1000;
     }
-    .sidebar.collapsed {
+
+    .admin-layout .sidebar .nav-link {
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .admin-layout .sidebar .nav-link i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .admin-layout .sidebar.collapsed {
       width: 80px;
     }
-    .sidebar.collapsed .nav-item p,
-    .sidebar.collapsed .sidebar-logo span {
+
+    .admin-layout .sidebar.collapsed .nav-link span {
       display: none;
     }
-    .sidebar.collapsed .logo img {
-      width: 50px;
-      height: auto;
+
+    .admin-layout .sidebar.collapsed .nav-link i {
+      margin-right: 0;
     }
-    .content-wrapper {
-      flex-grow: 1;
+
+    .admin-layout .content {
       margin-left: 250px;
+      padding: 80px 20px 20px;
       transition: margin-left 0.3s ease;
-      padding: 20px;
     }
-    .sidebar.collapsed + .content-wrapper {
+
+    .admin-layout .sidebar.collapsed + .content {
       margin-left: 80px;
     }
-    .navbar-header {
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+
+    .admin-layout .navbar {
       position: fixed;
-      width: 100%;
       top: 0;
-      background: white;
-      z-index: 1000;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 0 20px;
+      width: 100%;
+      z-index: 1050;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    .profile-section {
+
+    .admin-layout .navbar .btn-toggle {
+      border: none;
+      background: transparent;
+      font-size: 1.3rem;
+    }
+
+    .admin-layout .profile-section {
       display: flex;
       align-items: center;
+      gap: 10px;
     }
-    .profile-section img {
+
+    .admin-layout .profile-section img {
       width: 40px;
       height: 40px;
       border-radius: 50%;
     }
-    .profile-section span {
-      margin-left: 10px;
-      font-weight: bold;
-    }
 
-
-
-
+    /* Responsive adjustments */
     @media (max-width: 768px) {
-  .wrapper {
-    flex-direction: column;
-  }
+      .admin-layout .sidebar {
+        left: -250px;
+        width: 250px;
+      }
 
-  .sidebar {
-    position: relative;
-    width: 100%;
-  }
+      .admin-layout .sidebar.mobile-open {
+        left: 0;
+      }
 
-  .content-wrapper {
-    margin-left: 0;
-    padding-top: 60px; /* Adjust based on your navbar height */
-  }
+      .admin-layout .content {
+        margin-left: 0;
+        padding-top: 70px;
+      }
 
-  .navbar-header {
-    padding: 10px 20px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+      .admin-layout .sidebar.collapsed .nav-link span {
+        display: none;
+      }
 
-  .profile-section {
-    margin-top: 10px;
-  }
-
-  .sidebar.collapsed {
-    width: 0;
-  }
-}
-
+      .admin-layout .sidebar.mobile-open .nav-link span {
+        display: inline;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="wrapper">
+  <div class="admin-layout">
     <!-- Sidebar -->
-    <div class="sidebar" data-background-color="dark">
-      <div class="sidebar-logo">
-        <div class="logo-header" data-background-color="dark">
-          <a href="#" class="logo">
-            <img src="/img/logo.png" alt="navbar brand" class="navbar-brand" height="20" />
-          </a>
-          <button class="btn btn-toggle" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-          </button>
-        </div>
-      </div>
-      <div class="sidebar-wrapper">
-        <div class="sidebar-content">
-          <ul class="nav nav-secondary">
-            <li class="nav-item active">
-              <a href="/admin/Dashboard">
-                <i class="fas fa-home"></i>
-                <p>Dashboard</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/users">
-                <i class=" fas fa-users"></i>
-                <p>Customer Management</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/brands">
-                <i class="fas fa-th-list"></i>
-                <p>Brand Management</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/orders">
-                <i class="fas fa-pen-square"></i>
-                <p>Order Management</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/category">
-                <i class="fas fa-table"></i>
-                <p>Category Management</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/addProducts">
-                <i class="fas fa-plus"></i>
-                <p>Add Product</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/products">
-                <i class="fas fa-shopping-bag"></i>
-                <p>Product Management</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/stocks">
-                <i class="fas fa-box"></i>
-                <p>Stock Management</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/coupons">
-                <i class="fas fa-ticket-alt"></i>
-                <p>Coupon Management</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/admin/sales">
-                <i class="fas fa-chart-line"></i>
-                <p>Sales Report</p>
-              </a>
-            </li>
-           
-            <li class="nav-item">
-              <a href="/admin/logout">
-                <i class="fas fa-sign-out-alt"></i>
-                <p>Logout</p>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
+    <div class="sidebar" id="sidebar">
+      <nav class="nav flex-column">
+        <a class="nav-link" href="/admin/Dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a>
+        <a class="nav-link" href="/admin/users"><i class="fas fa-users"></i><span>Customer Management</span></a>
+        <a class="nav-link" href="/admin/brands"><i class="fas fa-th-list"></i><span>Brand Management</span></a>
+        <a class="nav-link" href="/admin/orders"><i class="fas fa-pen-square"></i><span>Order Management</span></a>
+        <a class="nav-link" href="/admin/category"><i class="fas fa-table"></i><span>Category Management</span></a>
+        <a class="nav-link" href="/admin/addProducts"><i class="fas fa-plus"></i><span>Add Product</span></a>
+        <a class="nav-link" href="/admin/products"><i class="fas fa-shopping-bag"></i><span>Product Management</span></a>
+        <a class="nav-link" href="/admin/stocks"><i class="fas fa-box"></i><span>Stock Management</span></a>
+        <a class="nav-link" href="/admin/coupons"><i class="fas fa-ticket-alt"></i><span>Coupon Management</span></a>
+        <a class="nav-link" href="/admin/sales"><i class="fas fa-chart-line"></i><span>Sales Report</span></a>
+        <a class="nav-link" href="/admin/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+      </nav>
     </div>
-    <!-- End Sidebar -->
 
-    <!-- Navbar Header -->
-    <nav class="navbar navbar-header navbar-expand-lg border-bottom">
-      <div class="container-fluid">
-        <button class="btn btn-toggle" onclick="toggleSidebar()">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="profile-section">
-          <img src="https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg" alt="Admin Profile">
-          <span>Hi, Admin</span>
-        </div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-light px-3">
+      <button class="btn-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="profile-section ms-auto">
+        <img src="https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg" alt="Admin Profile">
+        <span>Hi, Admin</span>
       </div>
     </nav>
-    <!-- End Navbar -->
 
-  
+    <!-- Content Area -->
+    <div class="content" id="mainContent">
+      <!-- Your page content goes here -->
+    </div>
+  </div>
 
+  <!-- Script -->
   <script>
     function toggleSidebar() {
-      document.querySelector(".sidebar").classList.toggle("collapsed");
+      const sidebar = document.getElementById('sidebar');
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        sidebar.classList.toggle('mobile-open');
+      } else {
+        sidebar.classList.toggle('collapsed');
+        document.getElementById('mainContent').classList.toggle('collapsed');
+      }
     }
+
+    // Close sidebar on outside click (optional)
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('mobile-open')) {
+        const isClickInside = sidebar.contains(e.target) || e.target.closest('.btn-toggle');
+        if (!isClickInside) {
+          sidebar.classList.remove('mobile-open');
+        }
+      }
+    });
   </script>
  

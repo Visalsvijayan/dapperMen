@@ -24,6 +24,10 @@ const OrderSchema=new mongoose.Schema({
         productOfferAmount:{
             type:Number,
             default:0
+        },
+        productStatus:{
+            type:String,
+        
         }
     }],
 
@@ -51,7 +55,7 @@ const OrderSchema=new mongoose.Schema({
     status:{
         type:String,
         required:true,
-        enum:['Pending','Processing','Shipped','Delivered','Reject return product','Cancelled']
+        enum:['Pending','Processing','Shipped','Delivered','Return Request','Reject Return Request','Cancelled','Returned']
     },
     createdOn:{
         type:Date,
@@ -81,6 +85,9 @@ const OrderSchema=new mongoose.Schema({
     },
     returnReason:{
         type:String
+    },
+    deliverdAt:{
+        type:Date
     }
 
 })

@@ -12,9 +12,9 @@ const { userAuth } = require('../middlewares/auth');
 
 //home page and shopping page
 router.get('/',userController.loadHomepage)
-router.get('/shop',userAuth,userController.loadShoppingPage);
-router.get('/filter',userAuth,userController.filterProduct)
-router.get('/filterPrice',userAuth,userController.filterProduct)
+router.get('/shop',productController.loadShoppingPage);
+router.get('/filter',productController.filterProduct)
+router.get('/filterPrice',userAuth,productController.filterProduct)
 //product management
 router.get('/productDetails',userAuth,productController.productDetails)
 
@@ -80,6 +80,7 @@ router.get('/place-order-success',userAuth,orderController.placeOrderSuccess)
 //ordermanagemnt-from-profile session
 router.get('/order-Details',userAuth,orderController.orderDetailPage)
 router.get('/cancel-Order',userAuth,orderController.cancelOrder)
+router.patch('/orders/:orderId/items/:productId/cancel',userAuth,orderController.cancelSingleProduct)
 router.patch('/return-Order-Request/:orderId',userAuth,orderController.returnRequest)
 //wishlist management
 router.post('/wishlist/toggle/:id',userAuth,wishlistController.postWishlist)

@@ -1,8 +1,6 @@
 <%- include("../../views/partials/admin/header") %>
 <style>
-  .maindiv{
-    margin-top: 60px;
-  }
+   
 </style>
 <!-- Main wrapper with proper constraints -->
 <div id="admin-wrapper" class="container-fluid maindiv px-0" style="overflow-x: hidden;">
@@ -109,14 +107,105 @@
     <!-- Pie Charts in responsive grid -->
     <div class="row g-4 mt-2 mx-0">
        
-      <div class="col-lg-12">
+      <div class="col-lg-6">
         <div class="card shadow-sm" style="overflow: hidden;">
           <div class="card-header">Payment Method Distribution</div>
-          <div class="card-body" style="position: relative; height: 400px; padding: 15px;">
+          <div class="card-body" style="position: relative; height: 490px; padding: 15px;">
             <canvas id="paymentPie"></canvas>
           </div>
         </div>
       </div>
+      <!--top 10 product table-->
+      <div class="col-lg-6">
+        <div class="card shadow-sm" style="overflow: hidden;">
+          <div class="card-header fw-bold">Top 10 Best Selling Products</div>
+          <div class="card-body" style="max-height: 490px; overflow-y: auto;">
+            
+             
+            <div class="d-flex fw-semibold border-bottom pb-2 mb-2 text-secondary">
+              <div class="col-6"> Product Name</div>
+              <div class="col-3">Quantity Sold</div>
+              <div class="col-3">Total Price</div>
+            </div>
+      
+             
+             <%if(topTenData && topTenData.length > 0 && topTenData[0].topProduct.length > 0){%>
+                <%topTenData[0].topProduct.forEach(product=>{%>
+                  <div class="d-flex align-items-center py-2 border-bottom">
+                    <div class="col-6"><%=product.name%></div>
+                    <div class="col-3"><%=product.totalQuantity%></div>
+                    <div class="col-3">₹<%=product.totalPrice%></div>
+                  </div>
+                <%})%>  
+            <%}else{%>
+              div class="col-12">No data</div>
+            <%}%>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+
+    <!--top 10 categories-->
+    <div class="row g-4 mt-2 mx-0">
+      <div class="col-lg-6">
+        <div class="card shadow-sm" style="overflow: hidden;">
+          <div class="card-header fw-bold">Top 10 Best Selling Categories</div>
+          <div class="card-body" style="max-height: 490px; overflow-y: auto;">
+          
+             
+            <div class="d-flex fw-semibold border-bottom pb-2 mb-2 text-secondary">
+              <div class="col-6">Category Name</div>
+              <div class="col-3">Quantity Sold</div>
+              <div class="col-3">Total Price</div>
+            </div>
+      
+             
+             <%if(topTenData && topTenData.length > 0 && topTenData[0].topProduct.length > 0){%>
+                <%topTenData[0].topCategory.forEach(product=>{%>
+                  <div class="d-flex align-items-center py-2 border-bottom">
+                    <div class="col-6"><%=product.name%></div>
+                    <div class="col-3"><%=product.totalQuantity%></div>
+                    <div class="col-3">₹<%=product.totalPrice%></div>
+                  </div>
+                <%})%>  
+            <%}else{%>
+              div class="col-12">No data</div>
+            <%}%>
+          </div>
+        </div>
+      </div>
+      <!--top 10 brands-->
+      <div class="col-lg-6">
+        <div class="card shadow-sm" style="overflow: hidden;">
+          <div class="card-header fw-bold">Top 10 Best Selling Brands</div>
+          <div class="card-body" style="max-height: 490px; overflow-y: auto;">
+          
+             
+            <div class="d-flex fw-semibold border-bottom pb-2 mb-2 text-secondary">
+              <div class="col-6">Brand Name</div>
+              <div class="col-3">Quantity Sold</div>
+              <div class="col-3">Total Price</div>
+            </div>
+      
+             
+             <%if(topTenData && topTenData.length > 0 && topTenData[0].topProduct.length > 0){%>
+                <%topTenData[0].topBrand.forEach(product=>{%>
+                  <div class="d-flex align-items-center py-2 border-bottom">
+                    <div class="col-6"><%=product.name%></div>
+                    <div class="col-3"><%=product.totalQuantity%></div>
+                    <div class="col-3">₹<%=product.totalPrice%></div>
+                  </div>
+                <%})%>  
+            <%}else{%>
+              div class="col-12">No data</div>
+            <%}%>
+          </div>
+        </div>
+      </div>
+
+
     </div>
 
     

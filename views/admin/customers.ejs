@@ -1,16 +1,17 @@
  
 <%- include ("../../views/partials/admin/header") %>
 <style>
-    .container{
-      padding-left:200px ;
-      padding-top: 100px;
-        
+    .maindiv{
+        width: 80%;
+        margin-right: 30px;
+
     }
+     
 </style>
-<div class="container">
+<div class="container-fluid maindiv">
     <div class="content-header row">
         <div class="d-flex justify-content-between align-items-center">
-            <h2 class="content-title card-title">Customers</h2>
+            <h2 class="content-title card-title mb-5">Customers</h2>
            
         </div>
     </div>         
@@ -61,15 +62,34 @@
             <div class="container mt-3">
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-                        <%for(let i=1;i<=totalPages;i++){%>
-                            <li class="page-item <%=(i===currentPage) ? 'active' : '' %>">
-                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-
-                            </li>
-                        <%}%>    
-
+                      <% 
+                        let startPage = Math.max(currentPage - 1, 1);
+                        let endPage = Math.min(startPage + 2, totalPages);
+                        if (endPage - startPage < 2) {
+                          startPage = Math.max(endPage - 2, 1);
+                        }
+                      %>
+                  
+                      <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= currentPage - 1 %>">Prev</a>
+                        </li>
+                      <% } %>
+                  
+                      <% for (let i = startPage; i <= endPage; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                          <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                      <% } %>
+                  
+                      <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                        </li>
+                      <% } %>
                     </ul>
-                </nav>
+                  </nav>
+                  
             </div>
     
 

@@ -4,7 +4,7 @@ const Product=require('../../models/productSchema')
 const getBrandPage=async(req,res)=>{
     try {
         const page=parseInt(req.query.page)||1;
-        const limit=2;
+        const limit=3;
         const skip=(page-1)*limit;
         const brandData=await Brand.find({}).sort({createdAt:-1}).skip(skip).limit(limit);
         const totalBrands=await Brand.countDocuments();
@@ -54,8 +54,9 @@ const addBrand=async (req,res)=>{
 const blockBrand=async (req,res)=>{
     try {
         const id=req.query.id;
+        const page=req.query.page || 1;
         await Brand.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.redirect("/admin/brands")
+        res.redirect(`/admin/brands?page=${page}`)
     } catch (error) {
         console.log('error is blocking the brand',error)
         res.redirect('/admin/pageerror')
@@ -65,8 +66,9 @@ const blockBrand=async (req,res)=>{
 const unblockBrand=async (req,res)=>{
     try {
         const id=req.query.id;
+        const page=req.query.page || 1;
         await Brand.updateOne({_id:id},{$set:{isBlocked:false}});
-        res.redirect('/admin/brands')
+        res.redirect(`/admin/brands?page=${page}`)
     } catch (error) {
         console.log('unblock the brand error',error)
         res.redirect('/admin/pageerror')
@@ -77,12 +79,13 @@ const unblockBrand=async (req,res)=>{
 const deleteBrand=async(req,res)=>{
     try {
         const {id}=req.query
+        const page=req.query.page || 1;
         if(!id){
             return res.status(400).redirect('/admin/pageerror')
 
         }
         await Brand.deleteOne({_id:id});
-        res.redirect("/admin/brands")
+        res.redirect(`/admin/brands?page=${page}`)
     } catch (error) {
         console.log('delete brand error:',error)
         res.redirect('/admin/pageerror')

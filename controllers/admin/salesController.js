@@ -4,7 +4,68 @@ const moment=require('moment')
 
 const getSelesReportPage=async(req,res)=>{
     try {
-        res.render('sales-report')
+
+         //top 10 best selling products
+         const topTenData=await Order.aggregate([
+            {$unwind:"$orderItems"},
+            {$lookup:{
+                from:"products",
+                localField:"orderItems.product",
+                foreignField:"_id",
+                as:"productDetails"
+
+            }},
+            { $unwind: "$productDetails" },
+            {$lookup:{
+                from:"categories",
+                localField:"productDetails.category",
+                foreignField:"_id",
+                as:"categoryDetails"
+            }},
+            {$unwind:"$categoryDetails"},
+            {$facet:{
+                topProduct:[
+                    {
+                        $group:{
+                            _id:"$orderItems.product",
+                            name:{$first:"$productDetails.productName"},
+                            totalQuantity:{$sum:"$orderItems.quantity"},
+                            totalPrice:{$sum:"$orderItems.price"}
+                        }
+                    },
+                    {$sort:{totalQuantity:-1}},
+                    {$limit:10}
+                ],
+                topCategory:[
+                    {$group:{
+                        _id:"$categoryDetails._id",
+                        name:{$first:"$categoryDetails.name"},
+                        totalQuantity:{$sum:"$orderItems.quantity"},
+                        totalPrice:{$sum:"$orderItems.price"}
+                    }},
+                    {$sort:{totalQuantity:-1}},
+                    {$limit:10}
+                ],
+                topBrand:[
+                    {
+                        $group:{
+                            _id:"$productDetails.brand",
+                            name:{$first:"$productDetails.brand"},
+                            totalQuantity:{$sum:"$orderItems.quantity"},
+                            totalPrice:{$sum:"$orderItems.price"}
+                        }
+                    },
+                    {$sort:{totalQuantity:-1}},
+                    {$limit:10}
+                ]
+            }
+                 
+            }
+        ])
+        // bestSellingProducts.forEach(item=>console.log('best:',item.productDetails))
+        
+       
+        res.render('sales-report',{topTenData})
         
     } catch (error) {
         console.error('error in loading sales report page',error)
@@ -182,7 +243,8 @@ const salesDashboardData = async (req, res) => {
             ...item,
             percentage: ((item.count / totalPaymentOrders) * 100).toFixed(2)
         }));
-        
+
+       
         return res.json({
             labels,
             salesData,
@@ -195,7 +257,8 @@ const salesDashboardData = async (req, res) => {
             netDiscount,
             quantity,
             totalOrders,
-            paymentMethodData // Send payment method data for pie chart
+            paymentMethodData //pichart data
+            
         });
     } catch (error) {
         console.error('Error in sales report', error);
@@ -210,7 +273,7 @@ function generateCustomLabels(startDate, endDate) {
     labels.push(start.format('YYYY-MM-DD'));  // Or any other custom format
     start.add(1, 'days');
   }
-  console.log('labels:',labels)
+   
   return labels;
 }
 
@@ -224,7 +287,7 @@ const salesTableData=async(req,res)=>{
         const {sortBy,startDate,endDate}=req.body
         let query = {};
         
-        console.log(sortBy,startDate,endDate)
+        
 
         switch (sortBy) {
             case 'daily':
@@ -328,7 +391,8 @@ const salesTableData=async(req,res)=>{
 
         res.render('sale-tableData',{
             salesData,
-            salesSummery
+            salesSummery,
+            startDate,endDate,sortBy
         })
     } catch (error) {
         console.error('error in sales table',error)

@@ -238,7 +238,13 @@ async function prepareOrderData(req){
       })
   }
 
-  return {newOrder,finalAmount,userId,walletAmount}
+  // return {newOrder,finalAmount,userId,walletAmount}
+  return { 
+    newOrder, 
+    finalAmount, 
+    userId, 
+    walletAmount 
+  }
 }
 
 
@@ -307,6 +313,7 @@ const placeOrderRazorpay=async(req,res)=>{
     
 
     const {newOrder,finalAmount,userId}=await prepareOrderData(req)
+     
     const options={
       amount:finalAmount*100,
       currency:"INR",
@@ -323,6 +330,13 @@ const placeOrderRazorpay=async(req,res)=>{
     })
     
   } catch (error) {
+    console.error('error in place order Razorpay',error)
+    
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while placing the order. Please try again later.',
+      error: error.message || 'Internal Server Error'
+    });
     
   }
 }
@@ -334,6 +348,7 @@ const verifyPayment = async (req, res) => {
       razorpay_signature,
       orderData, //  orderData from frontend
     } = req.body;
+    
 
     const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
     hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
@@ -524,12 +539,15 @@ const cancelOrder=async(req,res)=>{
         //stock changing
         const order=await Order.findById(oid).populate('orderItems.product')
         for(let item of order.orderItems){
-           const productId= item.product._id;
-           const cancelqantity=item.quantity;
+          if(item.productStatus!=='Cancelled'){
+            const productId= item.product._id;
+            const cancelqantity=item.quantity;
+              
+            await Product.findByIdAndUpdate(productId,{
+              $inc:{quantity:cancelqantity}
+            })
             
-           await Product.findByIdAndUpdate(productId,{
-            $inc:{quantity:cancelqantity}
-           })
+          } 
             
         }
         
@@ -538,7 +556,13 @@ const cancelOrder=async(req,res)=>{
             {new:true}
         )
         //updating user if payment is wallet
-        const totalAmount=order.finalAmount;
+        const totalAmount = order.orderItems.reduce((acc, product) => {
+          if (product.productStatus !== 'Cancelled') {
+            return acc + (product.price * product.quantity);
+          }
+          return acc;
+        }, 0);
+
         if(order.payment==='wallet'){
           await User.findByIdAndUpdate(req.session.user._id,{
             $inc:{"wallet.balance":totalAmount},
@@ -557,13 +581,82 @@ const cancelOrder=async(req,res)=>{
         res.redirect('/pageNotFound')
     }
 }
+const cancelSingleProduct=async(req,res)=>{
+  try {
+    const{orderId,productId}=req.params;
+    const userId=req.session.user;
+    const order=await Order.findById(orderId).populate('orderItems.product')
+     
+    if(!order){
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    const item = order.orderItems.find(item =>
+      item.product._id.toString() === productId 
+    );
+
+    if (!item) {
+      return res.status(400).json({ message: 'Product  not found in order' });
+    }
+
+    const cancelAmount = (item.price)*(item.quantity);
+
+    console.log(cancelAmount)
+    // Update the product stock
+    await Product.findByIdAndUpdate(productId, {
+      $inc: { quantity: item.quantity }
+    });
+
+    // Update the productStatus to 'Cancelled'
+    item.productStatus = 'Cancelled';
+    await order.save();
+    
+     // Check if all products are now cancelled
+     const allCancelled = order.orderItems.every(item => item.productStatus === 'Cancelled');
+
+     if (allCancelled) {
+         order.status = 'Cancelled';
+         await order.save();
+     }
+
+    // Refund if payment method is wallet
+    if (order.payment === 'wallet') {
+      console.log('yes wallet payment')
+      console.log('user:',userId)
+      await User.findByIdAndUpdate(userId, {
+        $inc: { 'wallet.balance': cancelAmount },
+        $push: {
+          'wallet.transactions': {
+            date: new Date(),
+            status: 'Credited',
+            amount: cancelAmount,
+          },
+        },
+      });
+    }
+
+    return res.status(200).json({ message: 'Product cancelled successfully' });
+
+  } catch (error) {
+    console.error('error in cancel single product',error)
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
+
+
+
+
+
+
+
 
 const returnRequest=async(req,res)=>{
     try {
         const {orderId}=req.params;
         const {status,reason}=req.body;
         
-        await Order.findByIdAndUpdate(orderId,{status,returnReason:reason})
+        await Order.findByIdAndUpdate(orderId,{status,returnReason:reason},{ runValidators: true })
         res.json({success:true})
 
 
@@ -711,6 +804,7 @@ module.exports={
     placeOrderSuccess,
     orderDetailPage,
     cancelOrder,
+    cancelSingleProduct,
     returnRequest,
     getAddress,
     postAddAddressModal,

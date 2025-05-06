@@ -61,14 +61,10 @@
                     </td>
                     <td>
                         <%if(category.isListed){%>
-                            <button id="listBtn" class="category-management-button"  style="background-color:rgb(65, 210, 65);">
-                                <a href="/admin/listCategory?id=<%=category._id%>" class="text-white">Unlist</a>
-                            </button>
-                        <%}else{%>
-                            <button id="unlistBtn" class="category-management-button"  style="background-color:rgb(228, 46, 46);">
-                                    <a href="/admin/unlistCategory?id=<%=category._id%>"  class="text-white">List</a>
-                            </button>
-                        <%}%>
+                                 <a href="/admin/listCategory?id=<%=category._id%>" class="btn btn-danger">Unlist</a>
+                         <%}else{%>
+                                <a href="/admin/unlistCategory?id=<%=category._id%>"  class="btn btn-success">List</a>
+                         <%}%>
                     </td>
                     <td>
                         <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info text-white">Edit</a>

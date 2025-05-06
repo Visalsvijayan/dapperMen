@@ -31,7 +31,8 @@
     color: red;
   }
   .content-main{
-    margin: auto;
+    width: 80%;
+    margin-right: 30px;
   }
   .action-buttons {
     display: flex;
@@ -46,9 +47,9 @@
 </style>
 
 
-<section class="content-main">
+<div class=" container-fluid py-4 content-main">
   <div class="content-header">
-    <div>
+    <div class="mb-5">
       <h2 class="content-title card-title">Brands</h2>
     </div>
   </div>
@@ -57,7 +58,7 @@
       <div class="row">
         <div class="col-md-3">
 
-          <form method="post" action="/admin/addBrand" enctype="multipart/form-data">
+          <form method="post" action="/admin/addBrand" enctype="multipart/form-data" onsubmit="return validateForm(event)">
             <div class="mb-4">
               <label for="product_name" class="form-label">Brand Name</label>
               <input
@@ -70,7 +71,7 @@
             <label for="product_name" class="form-label">Brand Image</label>
             <div class="input-upload">
               <img src="" alt=""/>
-              <input class="form-control border" name="image" type="file" />
+              <input id="imgFileInput"  class="form-control border" name="image" type="file" />
             </div>
             <div class="d-grid">
               <button class="btn btn-primary mt-20" type="submit">
@@ -132,23 +133,21 @@
                   </td>
                   <%}%>
                   <td class="text-start">
-                    <%if(brand.isBlocked===false){%>
-                    <div class="action-buttons">
-                      <button class="btn btn-danger">
-                        <a href="/admin/blockBrand?id=<%=brand._id%>" class="text-white background-color:red">Block</a>
-                      </button>
-                    <%}else{%>  
-                      <button class="btn btn-success">
-                        <a href="/admin/UnblockBrand?id=<%=brand._id%>" class="text-white">Unblock</a>
-                      </button>
-                    <%}%>  
-                      <button class="btn btn-danger"
-                              style="width: 90px;"
-                              onclick="return confirmDelete()"  >
-                        <a href="/admin/deleteBrand?id=<%=brand._id%>" class="text-white">Delete</a>
-                      </button>
+                    <div class="action-buttons d-flex gap-2">
+                      <% if (!brand.isBlocked) { %>
+                        <a href="/admin/blockBrand?id=<%= brand._id %>&page=<%=currentPage%>" class="btn btn-danger">Block</a>
+                      <% } else { %>
+                        <a href="/admin/UnblockBrand?id=<%= brand._id %>&page=<%=currentPage%>" class="btn btn-success">Unblock</a>
+                      <% } %>
+                      <a href="/admin/deleteBrand?id=<%= brand._id %>&page=<%=currentPage%>"
+                         class="btn btn-danger"
+                         style="width: 90px;"
+                         onclick="return confirmDelete(event,this)">
+                         Delete
+                      </a>
                     </div>
                   </td>
+                  
                 </tr>
               </tbody>
             <%})%>  
@@ -177,20 +176,42 @@
   </div>
   
   
-</section>
+</div>
 
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  function confirmDelete(){
+    function confirmDelete(event, link) {
+    event.preventDefault(); // Prevent default link navigation immediately
+
     Swal.fire({
-                    title: "Are you sure?",
-                    text: "This will Delete the Brand!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Yes, Delete it!"
-    })      
+      title: "Are you sure?",
+      text: "This will delete the brand!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Navigate to the deletion URL only if confirmed
+        window.location.href = link.href;
+      }
+    });
   }
+ function validateForm(event){
+  const imgInput=document.getElementById('imgFileInput').value
+  const input= imgInput? imgInput:''
+  if(!input){
+    event.preventDefault();
+    Swal.fire({
+      icon:'error',
+      title:'No Image selected',
+      text:'Please select a Brand Image'
+    })
+    return false
+  }
+  return true
+ }
 </script>
 <%- include("../../views/partials/admin/footer") %>

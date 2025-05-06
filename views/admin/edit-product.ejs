@@ -20,8 +20,10 @@
        
     }
     .image-preview {
-        width: 100%;
-        height: 200px;
+        height: auto;
+        width: auto;
+        max-width: 500px;
+        max-height: 500px;
         border: 1px solid #ddd;
         display: flex;
         justify-content: center;
@@ -30,9 +32,12 @@
         margin-bottom: 10px;
     }
     .image-cropper img {
-    max-width: 300px;  /* Adjust this to the desired size */
-    max-height: 200px; /* Adjust this to the desired size */
-    object-fit: cover;
+     
+    
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
 }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
@@ -133,15 +138,18 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
+                                        
                                         <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                      
-                                            <input class="form-control" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage1(event), viewImage(event, 1),handleImageChange(0)"  >
-                                            
+                                            <input class="form-control" type="file" name="images" id="input1"
+                                                   accept="image/png, image/jpeg, image/jpg"
+                                                   onchange="viewImage1(event), viewImage(event, 1), handleImageChange(0)">
                                             <div id="images-error" class="error-message"></div>
-                                        </div>
-                                        <div class="image-cropper d-flex align-items-center" style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
-                                            <img src="/uploads/product-images/<%= product.productImage[0] %>" id="croppedImg1" alt="">
-                                            <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
+                                          </div>
+                                         
+                                        <div class="image-cropper d-flex flex-column align-items-center" style="display:none; width: 500px; margin-bottom: 20px;">
+                                            <img src="/uploads/product-images/<%= product.productImage[0] %>" id="croppedImg1" alt="Cropped Image" style="max-width: 100%; height: auto;">
+                                            
+                                            <button type="button" id="saveButton1" class="btn-sm btn-primary mt-3">Save</button>
                                         </div>
                                     </div>
                                     
@@ -151,7 +159,7 @@
                                            
                                             <input class="form-control" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage2(event),viewImage(event, 2),handleImageChange(1)">
                                         </div>
-                                        <div class="image-cropper d-flex align-items-center" style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                                        <div class="image-cropper   d-flex flex-column align-items-center" style="display:none; width: 500px; margin-bottom: 20px;">
                                             <img src="/uploads/product-images/<%= product.productImage[1] %>" id="croppedImg2" alt="">
                                             <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
                                         </div>
@@ -161,7 +169,7 @@
                                              
                                             <input class="form-control" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage3(event),viewImage(event, 3),handleImageChange(2)">
                                         </div>
-                                        <div class="image-cropper d-flex align-items-center" style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                                        <div class="image-cropper  d-flex flex-column align-items-center" style="display:none; width: 500px; margin-bottom: 20px;">
                                             <img src="/uploads/product-images/<%= product.productImage[2] %>" id="croppedImg3" alt="">
                                             <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
                                         </div>
@@ -171,7 +179,7 @@
                                             
                                             <input class="form-control" type="file" name="images" id="input4" accept="image/png, image/jpeg, image/jpg" onchange="viewImage4(event),viewImage(event, 4),handleImageChange(3)">
                                         </div>
-                                        <div class="image-cropper d-flex align-items-center" style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                                        <div class="image-cropper   d-flex flex-column align-items-center" style="display:none; width: 500px; margin-bottom: 20px;">
                                             <img src="/uploads/product-images/<%= product.productImage[3] %>" id="croppedImg4" alt="">
                                             <button type="submit" id="saveButton4" class="btn-sm btn-primary">Save</button>
                                         </div>
