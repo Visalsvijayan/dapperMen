@@ -62,8 +62,7 @@ const getSelesReportPage=async(req,res)=>{
                  
             }
         ])
-        // bestSellingProducts.forEach(item=>console.log('best:',item.productDetails))
-        
+         
        
         res.render('sales-report',{topTenData})
         

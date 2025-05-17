@@ -6,6 +6,7 @@ const bcrypt=require('bcrypt');
 const env=require('dotenv').config();
 const session=require('express-session');
 const mongoose=require('mongoose')
+const statusCodes=require('../../config/statusCode')
 
 function generateOtp(){
     const digits="1234567890";
@@ -57,7 +58,7 @@ const getForgotPassword=async(req,res)=>{
         res.render('forgotPassword')
     } catch (error) {
 
-        res.redirect('/pageNotFound')
+        res.status(statusCodes.NOT_FOUND).redirect('/pageNotFound')
     }
 
     
@@ -166,10 +167,6 @@ const securePassword=async(password)=>{
         
     }
 }
-
-
-
-
 
 
 const userProfile = async (req, res) => {
@@ -503,7 +500,7 @@ const deleteAddress=async(req,res)=>{
             }
         }}
     )
-    res.redirect('/userProfile')
+    res.redirect('/userProfile#address')
     } catch (error) {
         console.error("error in delete address: ",error)
         res.redirect('/pageNotFound')

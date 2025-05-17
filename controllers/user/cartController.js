@@ -1,7 +1,8 @@
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Cart=require('../../models/cartSchema')
-const mongoose=require('mongoose') 
+const mongoose=require('mongoose'); 
+const StatusCodes = require("../../config/statusCode");
 
  
 const getCartPage = async (req, res) => {
@@ -9,7 +10,7 @@ const getCartPage = async (req, res) => {
         const userId = req.session.user._id;
         const oid = new mongoose.Types.ObjectId(userId);
         const page=parseInt(req.query.page)||1;
-        const limit=5;
+        const limit=3;
         
         const user = await User.findById(userId).populate('cart');
   
@@ -67,7 +68,7 @@ const getCartPage = async (req, res) => {
         
     } catch (error) {
         console.error('Error in getting cart page:', error);
-        res.redirect('/pageNotFound');
+        res.status(StatusCodes.NOT_FOUND).redirect('/pageNotFound');
     }
 };
 
@@ -78,8 +79,8 @@ const addToCart = async (req, res) => {
         const quantity = parseInt(req.body.quantity) || 1;
         const userId = req.session.user._id;
         const product = await Product.findById(id);
-        if (!product) return res.status(404).json({ error: "Product not found" });
-        if (product.quantity <= 0) return res.json({ error: "Out of stock" });
+        if (!product) return res.status(StatusCodes.NOT_FOUND).json({ error: "Product not found" });
+        if (product.quantity <= 0) return res.status(StatusCodes.BAD_REQUEST).json({ error: "Out of stock" });
         const user = await User.findById(userId).populate('cart');
         let cart = await Cart.findOne({ userId });
 
@@ -115,10 +116,10 @@ const addToCart = async (req, res) => {
                 console.log('new q=',newQuantity)
 
                 if (newQuantity > product.quantity) {
-                    return res.json({ success: false,title:"Stock error", status: "Out of stock" });
+                    return res.status(StatusCodes.BAD_REQUEST).json({ success: false,title:"Stock error", status: "Out of stock" });
                 }
                 if (newQuantity > maxQuantity) {
-                    return res.json({ success: false, title:"Limit error",status: "Only 5 quantity per item can be added" });
+                    return res.status(StatusCodes.BAD_REQUEST).json({ success: false, title:"Limit error",status: "Only 5 quantity per item can be added" });
                 }
 
                 existingItem.quantity =newQuantity;
@@ -144,7 +145,7 @@ const addToCart = async (req, res) => {
 
     } catch (error) {
         console.error('Error in addToCart:', error);
-        res.status(500).json({ error: "Server error" });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "Server error" });
     }
 };
  
@@ -171,14 +172,14 @@ const changeQuantity = async (req, res) => {
         await cart.save();
 
         // Send response with new grand total
-        res.json({
+        res.status(StatusCodes.SUCCESS).json({
             success: true,
             quantity: quantity,
             grandTotal: grandTotal.toFixed(2)
         });
 
     } catch (error) {
-        res.status(500).json({
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Error updating quantity'
         });
@@ -197,10 +198,10 @@ const removeCartItem=async(req,res)=>{
             {new:true}
         ).populate('items.productId');
         if(!updateCart){
-            return res.status(404).json({success:false,message:'cart not found'})
+            return res.status(StatusCodes.NOT_FOUND).json({success:false,message:'cart not found'})
 
         }
-        res.json({
+        res.status(StatusCodes.SUCCESS).json({
             success:true,
             message:'Item removed from cart',
             cart:updateCart
@@ -208,7 +209,7 @@ const removeCartItem=async(req,res)=>{
 
     } catch (error) {
         console.error('error in removing item from cart:',error);
-        res.status(500).json({success:false,message:'server error'});
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success:false,message:'server error'});
         
     }
 }

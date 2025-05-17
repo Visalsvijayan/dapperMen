@@ -16,16 +16,28 @@ passport.use(
 
         if (user) {
           return done(null, user);
-        } else {
-          user = new User({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            googleId: profile.id,
-          });
+        }
 
+         user = await User.findOne({ email: profile.emails[0].value });
+
+        if (user) {
+          // Link this Google account to the existing user
+          user.googleId = profile.id;
           await user.save();
           return done(null, user);
         }
+        const referralCode = await generateReferralCode(profile.displayName);
+            user = new User({
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            googleId: profile.id,
+            referralCode:referralCode
+        });
+
+        await user.save();
+           
+        return done(null, user);
+        
       } catch (error) {
         return done(error, null);
       }
@@ -46,5 +58,22 @@ passport.deserializeUser((id, done) => {
       done(err, null);
     });
 });
+
+const generateReferralCode = async (name) => {
+  const firstName = name.trim().split(' ')[0].toUpperCase();
+  let referralCode;
+  let exists = true;
+
+  while (exists) {
+    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+    referralCode = `${firstName}-${randomStr}`;
+    exists = await User.exists({ referralCode });
+  }
+  console.log('ref:',referralCode)
+  return referralCode;
+
+};
+
+
 
 module.exports = passport;

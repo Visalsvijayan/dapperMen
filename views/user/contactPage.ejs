@@ -1,0 +1,183 @@
+ 
+<%- include("../../views/partials/user/header") %>
+  <!-- Contact Section -->
+  <section class="container py-5">
+    <div class="row">
+         <div class="col-md-2"></div>
+      <!-- Contact Form -->
+      <div class="col-md-4">
+        <h3>Contact Us</h3>
+        <form id="contactForm">
+          <div class="mb-3">
+            <label for="name" class="form-label">Your Name</label>
+            <input type="text" class="form-control" id="name" placeholder="Enter your name" name="name" required />
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" placeholder="name@example.com" name="email" required />
+          </div>
+          <div class="mb-3">
+            <label for="subject" class="form-label">Subject</label>
+            <input type="text" class="form-control" id="subject" placeholder="Subject" name="subject" required />
+          </div>
+          <div class="mb-3">
+            <label for="message" class="form-label">Your Message</label>
+            <textarea class="form-control" id="message" rows="5" placeholder="Write your message..." name="message" required></textarea>
+          </div>
+          <button type="submit" id="submit"class="btn btn-primary">Send Message</button>
+        </form>
+      </div>
+      <div class="col-md-2"></div>
+      <!-- Contact Info -->
+      <div class="col-md-4">
+        <h3>Get in Touch</h3>
+        <p><strong>Address:</strong> dapperMen building,kochi,Kerala</p>
+        <p><strong>Email:</strong> support@dapperMen.com</p>
+        <p><strong>Phone:</strong> 0496 256 58 78</p>
+
+        <!-- Google Map Embed -->
+        <div class="ratio ratio-4x3 mt-4">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.019375149988!2d144.95605441532142!3d-37.81720997975174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d43f1f9c4cb%3A0x2f0e0b8324a09d7!2sFederation%20Square!5e0!3m2!1sen!2sus!4v1639627313446!5m2!1sen!2sus"
+            allowfullscreen=""
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <%- include("../../views/partials/user/footer") %>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- <script>
+    //  const urlParams = new URLSearchParams(window.location.search);
+    // if (urlParams.get('sent') === 'success') {
+    //     Swal.fire({
+    //     icon: 'success',
+    //     title: 'Message Sent!',
+    //     text: 'Thank you for contacting us.',
+    //     });
+    // }
+
+    // document.getElementById('submit').addEventListener('click',async(e)=>{
+    //     e.preventDefault();
+    //     const name=document.getElementById('name').value.trim();
+    //     const email=document.getElementById('email').value.trim();
+    //     const subject=document.getElementById('subject').value.trim();
+    //     const message=document.getElementById('message').value.trim();
+    //      if (!/^[a-zA-Z\s]{3,50}$/.test(name)) {
+    //          return Swal.fire('Invalid Name', 'Name must be 3–50 characters and contain only letters and spaces.', 'error');
+    //      }
+
+    //     if (!/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+    //     return Swal.fire('Invalid Email', 'Please enter a valid email address.', 'error');
+    //     }
+
+    //     if (subject.length < 5 || subject.length > 100) {
+    //     return Swal.fire('Invalid Subject', 'Subject must be 5–100 characters.', 'error');
+    //     }
+
+    //     if (message.length < 10 || message.length > 1000) {
+    //     return Swal.fire('Invalid Message', 'Message must be 10–1000 characters.', 'error');
+    //     }
+
+    //     // If all validations pass
+    //     // Proceed to AJAX or form submission
+    //     Swal.fire('Sending...', 'Your message is being sent.', 'info');
+    //     })
+
+    //      try {
+    //         const response = await fetch('/contact', {
+    //                 method: 'POST',
+    //                 headers: {
+    //                 'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({ name, email, subject, message })
+    //         });
+
+    //         const result = await response.json();
+
+    //         if (result.success) {
+    //             Swal.fire('Success', 'Message sent successfully!', 'success');
+    //             document.getElementById('contactForm').reset();
+    //         } else {
+    //             Swal.fire('Error','Something went wrong!', 'error');
+    //         }
+
+    //     } catch (error) {
+    //        Swal.fire('Error', 'Failed to send message. Try again later.', 'error');
+    //     }
+    // });   
+
+
+
+
+
+    
+  </script> -->
+  
+
+  <script>
+  document.getElementById('submit').addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const message = document.getElementById('message').value.trim();
+
+    // Validation
+    if (!/^[a-zA-Z\s]{3,50}$/.test(name)) {
+      return Swal.fire('Invalid Name', 'Name must be 3–50 characters and contain only letters and spaces.', 'error');
+    }
+
+    if (!/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      return Swal.fire('Invalid Email', 'Please enter a valid email address.', 'error');
+    }
+
+    if (subject.length < 5 || subject.length > 100) {
+      return Swal.fire('Invalid Subject', 'Subject must be 5–100 characters.', 'error');
+    }
+
+    if (message.length < 10 || message.length > 1000) {
+      return Swal.fire('Invalid Message', 'Message must be 10–1000 characters.', 'error');
+    }
+
+    // Show loading alert
+    Swal.fire({
+      title: 'Sending...',
+      text: 'Your message is being sent.',
+      icon: 'info',
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // Send AJAX request
+    try {
+      const response = await fetch('/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, subject, message })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        Swal.fire('Success', 'Message sent successfully!', 'success');
+        document.getElementById('contactForm').reset();
+      } else {
+        Swal.fire('Error', 'Something went wrong!', 'error');
+      }
+
+    } catch (error) {
+      Swal.fire('Error', 'Failed to send message. Try again later.', 'error');
+    }
+  });
+</script>
+

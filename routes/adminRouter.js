@@ -10,9 +10,7 @@ const orderController=require('../controllers/admin/orderController')
 const coupenController=require('../controllers/admin/coupenController')
 const salesController=require('../controllers/admin/salesController')
 const {userAuth,adminAuth}=require('../middlewares/auth');
-// const multer=require('multer');
-// const storage=require("../helpers/multer");
-// const uploads=multer({storage:storage});
+ 
 
 const { uploadProductImages, uploadBrandImage } = require("../helpers/multer");
  
@@ -49,7 +47,6 @@ router.post('/editProduct/:id',adminAuth,uploadProductImages.array('images',4),p
 
 //brand management
 router.get("/brands",adminAuth,brandController.getBrandPage);
-// router.post('/addBrand',adminAuth,uploads.single("image"),brandController.addBrand)
 router.post("/addBrand", adminAuth, uploadBrandImage.single("image"), brandController.addBrand);
 router.get('/blockBrand',adminAuth,brandController.blockBrand)
 router.get('/unblockBrand',adminAuth,brandController.unblockBrand)
@@ -68,9 +65,8 @@ router.patch('/update-quantity/:id',adminAuth,productController.updateQuantity)
 //coupen management
 router.get('/coupons',adminAuth,coupenController.getCoupenPage)
 router.post('/coupons/addCoupon',adminAuth,coupenController.postCouponDetails)
-// router.put('/coupons/update/:id',adminAuth,coupenController.editCoupon)
- router.get('/coupons/editCoupon/:id',adminAuth,coupenController.getEditCoupon)
- router.post('/coupon/delete',adminAuth,coupenController.deleteCoupon)
+router.get('/coupons/editCoupon/:id',adminAuth,coupenController.getEditCoupon)
+router.post('/coupon/delete',adminAuth,coupenController.deleteCoupon)
 
  //salesManagement
  router.get('/sales',adminAuth,salesController. getSelesReportPage)

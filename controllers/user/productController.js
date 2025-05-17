@@ -3,12 +3,12 @@ const Category=require('../../models/categorySchema');
 const User=require('../../models/userSchema')
 const Brand=require('../../models/brandSchema')
 const mongoose=require('mongoose')
+const statusCodes=require('../../config/statusCode')
 
-
-
-
+ 
 const loadShoppingPage = async(req, res) => {
     try {
+        
         const user = req.session.user;
         const userData = await User.findOne({_id: user});
         const categories = await Category.find({isListed: true});
@@ -79,6 +79,7 @@ const loadShoppingPage = async(req, res) => {
         const brands = await Brand.find({isBlocked: false});
         
         res.render('shop', {
+            selectPage:'shop',
             user: userData,
             products: products,
             category: categories.map(category => ({_id: category._id, name: category.name})),
@@ -99,13 +100,10 @@ const loadShoppingPage = async(req, res) => {
         
     } catch (error) {
         console.error("load shopping page error", error);
-        res.status(500).redirect('/pageNotFound');
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).redirect('/pageNotFound');
     }
 };
 
-  
-
- 
 const filterProduct = async (req, res) => {
     try {
         const user = req.session.user;
@@ -122,10 +120,6 @@ const filterProduct = async (req, res) => {
             filter.productName = { $regex: new RegExp(query, "i") };
         }
 
-        
-        // if (category) {
-        //     filter.category = category;
-        // }
         if (category) {
             const isListedCategory = await Category.findOne({ _id: category, isListed: true });
             if (isListedCategory) {
@@ -139,20 +133,7 @@ const filterProduct = async (req, res) => {
           }
 
          
-        // if (brand) {
-        //     const isUnblockedBrand=await Brand.findOne({brandName:brand,isBlocked:false})
-        //     // const brandDoc = await Brand.findById(brand);
-        //     if (isUnblockedBrand) {
-        //         filter.brand = isUnblockedBrand.brandName; // Match exact brand name string
-        //     }
-        //     else{
-        //         filter.brand={$in:(await Brand.find({isBlocked:false})).map(brand=>brand.brandName)}
-        //     }
-        // }
-        // else{
-        //     filter.brand={$in:(await Brand.find({isBlocked:false})).map(brand=>brand.brandName)}
-
-        //  }
+         
         if (brand) {
             const brandDoc = await Brand.findOne({ _id: brand, isBlocked: false });
             if (brandDoc) {
@@ -206,9 +187,7 @@ const filterProduct = async (req, res) => {
         const paginatedProducts = products.slice(startIndex, startIndex + itemsPerPage);
         const totalPages = Math.ceil(products.length / itemsPerPage);
 
-         
- 
-        res.render('shop', {
+         res.render('shop', {
             user:userData,
              products: paginatedProducts,
             category: categories,
@@ -224,7 +203,7 @@ const filterProduct = async (req, res) => {
 
     } catch (error) {
         console.error('Error in filter product:', error);
-        res.status(500).redirect('/pageNotFound');
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).redirect('/pageNotFound');
     }
 };
 
@@ -249,7 +228,7 @@ const productDetails=async(req,res)=>{
         })
     } catch (error) {
         console.error('error in product details',error)
-        res.status(500).redirect('/pageNotFound')
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).redirect('/pageNotFound')
     }
 }
 

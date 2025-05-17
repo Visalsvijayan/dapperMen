@@ -1,5 +1,21 @@
 <%- include("../../views/partials/admin/header") %>
 <style>
+  
+  #admin-wrapper {
+    width: 100vw;
+  }
+  
+  .main-content {
+    min-width: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0 !important;
+      max-width: 100% !important;
+    }
+  }
+
    
 </style>
 <!-- Main wrapper with proper constraints -->
@@ -296,12 +312,12 @@ function fetchData(payload) {
   .then(data => {
     console.log("Fetched data:", data);
     // update chart or dashboard 
-    document.getElementById('netSale').innerText='₹' + data.netSale
+    document.getElementById('netSale').innerText='₹' + data.netSale 
     document.getElementById('totalOrder').innerText= data.totalOrders
     document.getElementById('productSold').innerText=  data.quantity
     document.getElementById('productDiscount').innerText='₹' + data.netProductOffer
     document.getElementById('couponDiscount').innerText='₹' + data.netCoupon
-    document.getElementById('average').innerText='₹' +Math.round(data.netSale/data.totalOrders)
+    document.getElementById('average').innerText='₹' +Math.round(data.netSale/data.totalOrders) ||0
 
 
     updateBarChart(data.labels, data.salesData, data.totalDiscountData);
@@ -391,22 +407,3 @@ function updateBarChart(labels, salesData, discountData) {
     
 </script>
 
-<!-- Additional CSS to prevent overflow -->
-<style>
-   
-  
-  #admin-wrapper {
-    width: 100vw;
-  }
-  
-  .main-content {
-    min-width: 0;
-  }
-  
-  @media (max-width: 768px) {
-    .main-content {
-      margin-left: 0 !important;
-      max-width: 100% !important;
-    }
-  }
-</style>

@@ -1,6 +1,5 @@
 <%- include("../../views/partials/user/header") %>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-
+ 
 <style>
     /* Improved checkout styling */
     .checkout-container {
@@ -184,7 +183,7 @@
             </div>
 
              
-            <div class="checkout-section">
+            <div class="checkout-section" id="addressSection">
                 <h4>Shipping Address</h4>
                 <% if(userAddress && userAddress.address.length > 0) { %>
                     <div class="address-grid">
@@ -204,20 +203,18 @@
                                     <% } %>
                                 </address>
                                 <div class="d-flex justify-content-between">
-                                    <!-- <a href="/editAddress?id=<%= address._id %>&returnTo=checkout" 
-                                       class="btn btn-sm btn-outline-primary">Edit</a> -->
-                                       <button class="btn btn-info" data-action="edit-address" data-id="<%= address._id %>">Edit</button>
+                                     
+                                     <button class="btn btn-info" data-action="edit-address" data-id="<%= address._id %>">Edit</button>
                                 </div>
                             </div>
                         <% }) %>
                     </div>
                 <% } else { %>
-                    <div class="alert alert-secondary">No addresses found</div>
+                     
+                     <div class="address-grid"></div>
                 <% } %>
-                <!-- <div class="mt-3">
-                    <a href="" data-bs-toggle="modal" data-bs-target="#addressModal" class="btn btn-primary">+ Add New Address</a>
-                </div> -->
-                <button class="btn btn-primary" data-action="add-address">Add Address</button>
+                 
+                <button class="btn btn-primary mt-2" data-action="add-address">Add Address</button>
             </div>
             <!-- Payment Method Section -->
             <div class="checkout-section">
@@ -331,7 +328,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalTitle">Add Address</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" id="addressCloseByIcon" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form id="addressForm">
           <div class="modal-body">
@@ -390,7 +387,7 @@
               </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" id='addressClose' class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary">Save Address</button>
           </div>
         </form>
@@ -602,7 +599,7 @@
         key: key_id,
         amount: amount,
         currency: "INR",
-        name: "Your Shop Name",
+        name: "dapperMen",
         description: "Thank you for shopping",
         order_id: razorpayOrder.id,
         handler: function (response) {
@@ -690,6 +687,8 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('addressId').value = '';
       addressForm.reset();
       addressModal.show();
+      document.getElementById('addressClose').addEventListener('click',()=>addressModal.hide())
+      document.getElementById('addressCloseByIcon').addEventListener('click',()=>addressModal.hide())
     });
   });
 
@@ -710,6 +709,8 @@ document.addEventListener('DOMContentLoaded', function() {
         modalTitle.textContent = 'Edit Address';
         document.getElementById('addressId').value = addressId;
         addressModal.show();
+        document.getElementById('addressClose').addEventListener('click',()=>addressModal.hide())
+        document.getElementById('addressCloseByIcon').addEventListener('click',()=>addressModal.hide())
       } catch (error) {
         Swal.fire('Error', 'Failed to load address', 'error');
       }
@@ -799,6 +800,7 @@ function appendNewAddressToDOM(address) {
     openEditModal(address._id);
   });
 }
+ 
 
 async function openEditModal(addressId) {
   try {
@@ -813,6 +815,9 @@ async function openEditModal(addressId) {
     modalTitle.textContent = 'Edit Address';
     document.getElementById('addressId').value = addressId;
     addressModal.show();
+    document.getElementById('addressClose').addEventListener('click',()=>addressModal.hide())
+    document.getElementById('addressCloseByIcon').addEventListener('click',()=>addressModal.hide())
+
   } catch (error) {
     Swal.fire('Error', 'Failed to load address', 'error');
   }

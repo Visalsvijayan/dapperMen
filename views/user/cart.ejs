@@ -14,9 +14,9 @@
     <div class="page-header breadcrumb-wrap">
         <div class="container">
             <div class="breadcrumb">
-                <a href="index.html" rel="nofollow">Home</a>
-                <span></span> Shop
-                <span></span> Your Cart
+                <a href="/" rel="nofollow">Home</a> >
+                <span><a href="/shop">Shop</a></span> > 
+                <span><a href="/cart">Cart</a></span>
             </div>
         </div>
     </div>
@@ -110,12 +110,12 @@
                                 <tbody>
 
                                     <tr>
-                                        <td class="cart_total_label">Shipping</td>
+                                        <td class="cart_total_label">Shipping Charge</td>
                                         <td class="cart_total_amount"> <i class="ti-gift mr-5"></i>₹50
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="cart_total_label">Total</td>
+                                        <td class="cart_total_label">Product Price</td>
                                         <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">₹
                                             <%if(grandTotal){%>
                                                 <text id="total">
@@ -176,6 +176,7 @@
                 showConfirmButton:false
             })
         }
+        
     });
 
      

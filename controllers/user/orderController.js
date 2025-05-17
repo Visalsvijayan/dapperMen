@@ -9,6 +9,7 @@ const Order=require('../../models/OrderSchema')
 const { v4: uuidv4 } = require('uuid');
 const razorpayInstance=require('../../config/razorpay')
 const crypto = require('crypto');
+const StatusCodes = require("../../config/statusCode");
 
 const deliveryCharge=50;
 const getCheckoutPage=async(req,res)=>{
@@ -19,11 +20,7 @@ const getCheckoutPage=async(req,res)=>{
         const addressData=await Address.findOne({userId:user})
         // const couponData=await Coupon.find({isActive:true})
          const oid=new mongoose.Types.ObjectId(user)
-
-        
-
-
-         
+  
         const data=await User.aggregate([
             {$match:{_id:oid}},
             {$lookup:{
@@ -81,7 +78,7 @@ const getCheckoutPage=async(req,res)=>{
             
             let finalAmount=(data[0].grandTotal)+deliveryCharge
             finalAmount=Math.round(finalAmount)
-            res.render('checkoutPage',{
+            res.status(StatusCodes.SUCCESS).render('checkoutPage',{
                 data,
                 user:findUser,
                 isCart:true,
@@ -93,7 +90,7 @@ const getCheckoutPage=async(req,res)=>{
             })
         }
         else{
-            res.render('checkoutPage', {
+            res.status(StatusCodes.SUCCESS).render('checkoutPage', {
               data: [],
               coupons:[],
               user: findUser,
@@ -103,12 +100,9 @@ const getCheckoutPage=async(req,res)=>{
 
         }
         
-
-        
-        
     } catch (error) {
         console.error('error in checkout',error)
-        res.redirect('/pageNotFound')
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).redirect('/pageNotFound')
         
     }
 }
@@ -129,7 +123,7 @@ const deleteProduct=async(req,res)=>{
         const reducedCart= await Cart.findOne({userId:userId})
         const remainingItems=reducedCart.items.length
         
-        res.json({
+        res.status(StatusCodes.SUCCESS).json({
             success:true,
             message:'Item removed from cart',
             cart:updateCart,
@@ -138,7 +132,7 @@ const deleteProduct=async(req,res)=>{
 
     } catch (error) {
         console.error('error in removing item from cart:',error);
-        res.status(500).json({success:false,message:'server error'});
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success:false,message:'server error'});
         
     }
 }
@@ -161,12 +155,12 @@ async function prepareOrderData(req){
       .lean();
 
   if (!userDetails) {
-      return res.json({ success: false, message: "User not found" });
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "User not found" });
   }
 
    
   if (!userDetails.cart.length) {
-      return res.json({ success: false, message: "Cart is empty" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Cart is empty" });
   }
 
    
@@ -175,13 +169,13 @@ async function prepareOrderData(req){
   // Find address
   const findAddress = await Address.findOne({ userId, "address._id": addressId });
   if (!findAddress) {
-      return res.json({ success: false, message: "Address not found" });
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Address not found" });
   }
 
   // Find products in the cart
   const findProducts = await Product.find({ _id: { $in: productIds } });
   if (findProducts.length !== productIds.length) {
-      return res.json({ success: false, message: "Some products are not found" });
+      return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: "Some products are not found" });
   }
    
   const couponApplied= discount>0 ? true:false
@@ -261,7 +255,7 @@ const placeOrderCOD=async(req,res)=>{
 
     // Clear the user's cart
     await Cart.updateOne({userId:userId }, { $set: { items: [] } });
-    return res.json({
+    return res.status(StatusCodes.SUCCESS).json({
         success: true,
         redirect: `/place-order-success?orderId=${newOrder.orderId}`,
         orderId: orderDone._id
@@ -269,7 +263,7 @@ const placeOrderCOD=async(req,res)=>{
     
   } catch (error) {
     console.error("Error in placing order:", error);
-    res.status(500).json({success:false})
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success:false})
     
   }
   
@@ -279,7 +273,7 @@ const placeOrderWallet=async(req,res)=>{
   try {
     const {newOrder,finalAmount,userId,walletAmount}=await prepareOrderData(req)
     if(walletAmount<finalAmount){
-        return res.json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
           success: false,
           message: "Insufficient wallet balance"
         });
@@ -296,7 +290,7 @@ const placeOrderWallet=async(req,res)=>{
       }}
     })
     await Cart.updateOne({userId:userId }, { $set: { items: [] } });
-    return res.json({
+    return res.status(StatusCodes.CREATED).json({
         success: true,
         redirect: `/place-order-success?orderId=${newOrder.orderId}`,
         orderId: orderDone._id
@@ -304,7 +298,7 @@ const placeOrderWallet=async(req,res)=>{
              
   } catch (error) {
     console.error("Error in placing order:", error);
-    res.status(500).json({success:false})
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success:false})
   }
 }
 
@@ -321,7 +315,7 @@ const placeOrderRazorpay=async(req,res)=>{
     };
     const razorpayOrder=await razorpayInstance.orders.create(options);
     
-    return res.json({
+    return res.status(StatusCodes.SUCCESS).json({
       success:true,
       key_id:process.env.RAZORPAY_KEY_ID,
       amount:options.amount,
@@ -332,7 +326,7 @@ const placeOrderRazorpay=async(req,res)=>{
   } catch (error) {
     console.error('error in place order Razorpay',error)
     
-    return res.status(500).json({
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something went wrong while placing the order. Please try again later.',
       error: error.message || 'Internal Server Error'
@@ -366,7 +360,7 @@ const verifyPayment = async (req, res) => {
       offerAmount:item.offerAmount
     }));
     if (findProducts.length !== productIds.length) {
-        return res.json({ success: false, message: "Some products are not found" });
+        return res.status(StatusCodes.UNAUTHORIZED).json({ success: false, message: "Some products are not found" });
     }
     //order creation
     if (generatedSignature === razorpay_signature) {
@@ -391,20 +385,20 @@ const verifyPayment = async (req, res) => {
       const savedOrder = await newOrder.save();
      
       //  Deactivate referral coupon if used
-    if (orderData.discount > 0) {
-      const refCoupon = await Coupon.findOne({
-        isReferrCoupon: true,
-        isActive: true,
-        userId: req.session.user._id
-      });
+     if (orderData.discount > 0) {
+        const refCoupon = await Coupon.findOne({
+          isReferrCoupon: true,
+          isActive: true,
+          userId: req.session.user._id
+        });
 
-      if (refCoupon) {
-        await Coupon.updateOne(
-          { _id: refCoupon._id },
-          { $set: { isActive: false } }
-        );
+        if (refCoupon) {
+          await Coupon.updateOne(
+            { _id: refCoupon._id },
+            { $set: { isActive: false } }
+          );
+        }
       }
-    }
 
       await User.findByIdAndUpdate(savedOrder.userId, {
         $push: { orderHistory: savedOrder._id }
@@ -413,13 +407,13 @@ const verifyPayment = async (req, res) => {
       // Clear cart
       await Cart.updateOne({ userId: savedOrder.userId }, { $set: { items: [] } });
 
-      return res.json({ success: true, orderId: savedOrder.orderId });
+      return res.status(StatusCodes.SUCCESS).json({ success: true, orderId: savedOrder.orderId });
     } else {
       res.json({ success: false });
     }
   } catch (error) {
     console.error("Error in verifyPayment:", error);
-    res.json({ success: false });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
 
@@ -451,10 +445,10 @@ const applyCoupon=async(req,res)=>{
 
       }
     }
-    res.json({success:true,discountedPrice,discount})
+    res.status(StatusCodes.SUCCESS).json({success:true,discountedPrice,discount})
   } catch (error) {
     console.error('error in apply coupon',error)
-    res.json({success:false,discountedPrice:''})
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success:false,discountedPrice:''})
     
   }
 }
@@ -489,7 +483,7 @@ const placeOrderSuccess=async(req,res)=>{
         res.render('order-placedNew',{orid:orderId,address:selectedAddress,payment:payment,totalPrice:totalPrice,date:formattedDate})
     } catch (error) {
         console.error('error loading order placed succes page',error)
-        res.redirect('/pageNotFound');
+        res.status(StatusCodes.NOT_FOUND).redirect('/pageNotFound');
     }
 }
 
@@ -528,7 +522,7 @@ const orderDetailPage=async(req,res)=>{
         })
     } catch (error) {
         console.error('error in getting orderDetails page',error);
-        res.redirect('/pageNotFound')
+        res.status(StatusCodes.NOT_FOUND).redirect('/pageNotFound')
     }
 }
 const cancelOrder=async(req,res)=>{
@@ -578,7 +572,7 @@ const cancelOrder=async(req,res)=>{
         res.redirect(req.get('referer'));
     } catch (error) {
         console.error('error in cancelling the product',error);
-        res.redirect('/pageNotFound')
+        res.status(StatusCodes.NOT_FOUND).redirect('/pageNotFound')
     }
 }
 const cancelSingleProduct=async(req,res)=>{
@@ -588,14 +582,14 @@ const cancelSingleProduct=async(req,res)=>{
     const order=await Order.findById(orderId).populate('orderItems.product')
      
     if(!order){
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'Order not found' });
     }
     const item = order.orderItems.find(item =>
       item.product._id.toString() === productId 
     );
 
     if (!item) {
-      return res.status(400).json({ message: 'Product  not found in order' });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Product  not found in order' });
     }
 
     const cancelAmount = (item.price)*(item.quantity);
@@ -634,40 +628,28 @@ const cancelSingleProduct=async(req,res)=>{
       });
     }
 
-    return res.status(200).json({ message: 'Product cancelled successfully' });
+    return res.status(StatusCodes.SUCCESS).json({ message: 'Product cancelled successfully' });
 
   } catch (error) {
     console.error('error in cancel single product',error)
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
   }
 }
-
-
-
-
-
-
-
-
-
-
+ 
 const returnRequest=async(req,res)=>{
     try {
         const {orderId}=req.params;
         const {status,reason}=req.body;
         
         await Order.findByIdAndUpdate(orderId,{status,returnReason:reason},{ runValidators: true })
-        res.json({success:true})
+        res.status(StatusCodes.SUCCESS).json({success:true})
 
 
     } catch (error) {
-
          console.error("Status update error",error)
-         res.status(500).json({ success: false, message: "Internal server error" });
+         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal server error" });
     }
 }
-
- 
 
 const getAddress=async(req,res)=>{
     
@@ -679,18 +661,18 @@ const getAddress=async(req,res)=>{
             );
         
             if (!addressDoc || !addressDoc.address.length) {
-              return res.status(404).json({ 
+              return res.status(StatusCodes.NOT_FOUND).json({ 
                 success: false, 
                 error: "Address not found" 
               });
             }
         
-            res.json({ 
+            res.status(StatusCodes.SUCCESS).json({ 
               success: true, 
               ...addressDoc.address[0].toObject() 
             });
         } catch (error) {
-            res.status(500).json({ 
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
               success: false, 
               error: "Server error" 
             });
@@ -706,7 +688,7 @@ const postAddAddressModal=async(req,res)=>{
         const requiredFields = ['addressType', 'name', 'city', 'landMark', 'state', 'pincode', 'phone', 'altPhone'];
         for (const field of requiredFields) {
           if (!addressData[field]) {
-            return res.status(400).json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
               success: false,
               error: `${field} is required`
             });
@@ -727,7 +709,7 @@ const postAddAddressModal=async(req,res)=>{
     
         await addressDoc.save();
     
-        res.json({ 
+        res.status(StatusCodes.CREATED).json({ 
           success: true,
           message: "Address added successfully",
           address: addressDoc.address[addressDoc.address.length - 1]
@@ -735,7 +717,7 @@ const postAddAddressModal=async(req,res)=>{
     
       } catch (error) {
         console.error('Add address error:', error);
-        res.status(500).json({ 
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
           success: false, 
           error: error.message || "Failed to add address" 
         });
@@ -752,20 +734,20 @@ const editAddressModal = async (req, res) => {
       );
   
       if (result.modifiedCount === 0) {
-        return res.status(404).json({ 
+        return res.status(StatusCodes.NOT_FOUND).json({ 
           success: false, 
           error: "Address not found or no changes made" 
         });
       }
   
-      // 🔁 Fetch the updated address after updating
+      //  Fetch the updated address after updating
       const updatedDoc = await Address.findOne(
         { "address._id": id },
         { "address.$": 1 }
       );
   
       if (!updatedDoc || !updatedDoc.address.length) {
-        return res.status(404).json({ 
+        return res.status(StatusCodes.NOT_FOUND).json({ 
           success: false, 
           error: "Updated address not found" 
         });
@@ -773,21 +755,21 @@ const editAddressModal = async (req, res) => {
   
       const updatedAddress = updatedDoc.address[0];
   
-      res.json({ 
+      res.status(StatusCodes.SUCCESS).json({ 
         success: true,
         message: "Address updated successfully",
-        address: updatedAddress // ✅ Return to frontend
+        address: updatedAddress //  Return to frontend
       });
   
     } catch (error) {
       if (error.name === 'ValidationError') {
         const errors = Object.values(error.errors).map(err => err.message);
-        return res.status(400).json({ 
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
           success: false, 
           error: errors.join(', ') 
         });
       }
-      res.status(500).json({ 
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
         success: false, 
         error: "Failed to update address" 
       });

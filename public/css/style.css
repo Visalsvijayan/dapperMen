@@ -404,7 +404,7 @@ ol {
 }
 
 .header__logo {
-	padding: 30px 0;
+	padding: 0px 0;
 }
 
 .header__logo a {
@@ -422,6 +422,7 @@ ol {
 	margin-right: 45px;
 	position: relative;
 }
+
 
 .header__menu ul li.active a:after {
 	-webkit-transform: scale(1);

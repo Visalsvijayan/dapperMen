@@ -7,6 +7,7 @@ const cartController=require('../controllers/user/cartController')
 const orderController=require('../controllers/user/orderController')
 const wishlistController=require('../controllers/user/wishlistController')
 const walletController=require('../controllers/user/walletController')
+const contactController=require('../controllers/user/contactController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
 
@@ -29,6 +30,7 @@ router.post('/login',userController.login)
 router.get('/logout',userController.logout)
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
+    req.session.user = req.user; 
     res.redirect('/')
 })
 
@@ -71,7 +73,7 @@ router.post('/addAddressModal',userAuth,orderController.postAddAddressModal)
 router.post('/editAddressModal',userAuth,orderController.editAddressModal)
 
 router.delete('/delete-product',userAuth,orderController.deleteProduct)
-// router.post('/post-Order-placed',userAuth,orderController.postPlaceOrder)
+ 
 router.post('/order/cod',userAuth,orderController.placeOrderCOD)
 router.post('/order/wallet',userAuth,orderController.placeOrderWallet)
 router.post('/order/razorpay',userAuth,orderController.placeOrderRazorpay)
@@ -92,4 +94,8 @@ router.get('/wallet/addMoney',userAuth,walletController.getAddMoneyPage)
 router.post('/wallet/addMoney',userAuth,walletController.addMoney)
 //apply coupon
 router.post('/coupon/applyCoupon',userAuth,orderController.applyCoupon)
+//contact page& about page
+router.get('/contact',contactController.getContactPage)
+router.post('/contact',contactController.contactMessageSend)
+router.get('/about',contactController.aboutPage)
 module.exports=router;

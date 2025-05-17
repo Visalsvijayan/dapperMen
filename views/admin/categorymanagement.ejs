@@ -19,61 +19,63 @@
         <div class="category-management-actions">
             <button id="add-category-button">Add Category</button>
         </div>
-        <table class="category-management-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Offer-Price</th>
-                    <th>Offer</th>
-                    <th>Status</th>
-                    <th>List/Unlist</th>
-                    <th>Edit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%cata.reverse().forEach((category,index)=>{%>
-                <tr>
-                    <td> <%=category.name%> </td>
-                    <td> <%=category.description%> </td>
-                    <td>
-                        <%if(category.categoryOffer){%>
-                        <%=category.categoryOffer%>
-                        <%}else{%>
-                            0%
+        <div class="table-responsive">
+            <table class="category-management-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Offer-Price</th>
+                        <th>Offer</th>
+                        <th>Status</th>
+                        <th>List/Unlist</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%cata.reverse().forEach((category,index)=>{%>
+                    <tr>
+                        <td> <%=category.name%> </td>
+                        <td> <%=category.description%> </td>
+                        <td>
+                            <%if(category.categoryOffer){%>
+                            <%=category.categoryOffer%>
+                            <%}else{%>
+                                0%
+                                <%}%>
+                        </td>
+                        <td>
+                        <%if(category.categoryOffer===0){%>
+                                <button class="offerBtn" data-category-id="<%= category._id %>" data-action="add" style="background-color: rgb(65, 210, 65) ;color: white;" >Add Offer</button>
+                            <%}else{%>
+                                <button class="offerBtn" data-category-id="<%= category._id %>" data-action="remove" style="background-color:rgb(228, 46, 46)">Remove Offer</button>
+
+                            <%}%>   
+                        </td>
+                        <td>
+                            <%if(category.isListed){%>
+                                <span>Listed</span>
+                            <%}else{%>
+                                <span>Unlist</span>   
+                            <%}%>    
+
+                        </td>
+                        <td>
+                            <%if(category.isListed){%>
+                                    <a href="/admin/listCategory?id=<%=category._id%>" class="btn btn-danger">Unlist</a>
+                            <%}else{%>
+                                    <a href="/admin/unlistCategory?id=<%=category._id%>"  class="btn btn-success">List</a>
                             <%}%>
-                    </td>
-                    <td>
-                       <%if(category.categoryOffer===0){%>
-                            <button class="offerBtn" data-category-id="<%= category._id %>" data-action="add" style="background-color: rgb(65, 210, 65) ;color: white;" >Add Offer</button>
-                         <%}else{%>
-                            <button class="offerBtn" data-category-id="<%= category._id %>" data-action="remove" style="background-color:rgb(228, 46, 46)">Remove Offer</button>
+                        </td>
+                        <td>
+                            <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info text-white">Edit</a>
+                        </td>
+                    </tr>
 
-                          <%}%>   
-                    </td>
-                    <td>
-                        <%if(category.isListed){%>
-                            <span>Listed</span>
-                        <%}else{%>
-                            <span>Unlist</span>   
-                        <%}%>    
-
-                    </td>
-                    <td>
-                        <%if(category.isListed){%>
-                                 <a href="/admin/listCategory?id=<%=category._id%>" class="btn btn-danger">Unlist</a>
-                         <%}else{%>
-                                <a href="/admin/unlistCategory?id=<%=category._id%>"  class="btn btn-success">List</a>
-                         <%}%>
-                    </td>
-                    <td>
-                        <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-info text-white">Edit</a>
-                    </td>
-                </tr>
-
-                <%})%>
-            </tbody>
-        </table>
+                    <%})%>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <% // pagination div %>

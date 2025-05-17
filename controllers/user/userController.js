@@ -6,7 +6,9 @@ const Brand=require('../../models/brandSchema')
 const {generateReferralCoupon}=require('../../controllers/admin/coupenController')
 const bcrypt=require('bcrypt');
 const env=require('dotenv').config();
-const nodemailer=require('nodemailer')
+const nodemailer=require('nodemailer');
+const statusCode=require('../../config/statusCode')
+ 
 const loadHomepage=async(req,res)=>{
     try {
       const user=req.session.user;
@@ -16,8 +18,8 @@ const loadHomepage=async(req,res)=>{
         category:{$in:categories.map(category=>category._id)},quantity:{$gt:0}
         }
      );
-       const admin=req.session.admin
-     productData.sort((a,b)=>new Date(b.createOn)-new Date(a.createOn));
+        
+     productData.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
      productData=productData.slice(0,4);
      
 
@@ -29,22 +31,20 @@ const loadHomepage=async(req,res)=>{
         }
         else{
             
-                return res.render('home',{user:null,products:productData})
-
-            
-           
+            return res.render('home',{selectPage:'home',user:null,products:productData})
+ 
         }
         
     } catch (error) {
         console.log('home page is not found')
-        res.status(500).send('server error')
+        res.status(statusCode.INTERNAL_SERVER_ERROR).send('server error')
         
     }
 }
 
 const pageNotFound=async (req,res)=>{
     try {
-        res.render("page-404")
+        res.status(statusCode.NOT_FOUND).render("page-404")
     } catch (error) {
         res.redirect('/pageNotFound')
         
@@ -62,7 +62,7 @@ const loadLogin=async(req,res)=>{
  
     } catch (error) {
         console.error("Error loading login page:", error); // Log the error
-        res.status(500).redirect("/pageNotFound")
+        res.status(statusCode.INTERNAL_SERVER_ERROR).redirect("/pageNotFound")
         
     }
 }
@@ -117,15 +117,15 @@ const signup=async (req,res)=>{
         
         const{name,phone,email,password,confirm_password,referralCode}=req.body
         if(password!==confirm_password){
-            return res.render("signup",{message:"password do not match"})
+            return res.render("signup",{message:"password do not match",referralCode:''})
         }
         const findUser=await User.findOne({email});
         if(findUser){
-            return res.render('signup',{message:"user with same email already exist"});
+            return res.render('signup',{message:"user with same email already exist",referralCode:''});
         }
         const findPhone=await User.findOne({phone})
         if(findPhone){
-            return res.render('signup',{message:"User with same phone numver aleady exist"});
+            return res.render('signup',{message:"User with same phone number aleady exist",referralCode:''});
         }
 
         const otp=generateOtp();
@@ -260,7 +260,7 @@ const securePassword=async (password)=>{
         const passwordHash=await bcrypt.hash(password,10)
         return passwordHash;
     } catch (error) {
-        
+         throw error;
     }
 }
 

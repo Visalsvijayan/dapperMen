@@ -7,12 +7,14 @@
     <meta name="keywords" content="Male_Fashion, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Male-Fashion </title>
+    <title>dapperMen </title>
+     <link rel="icon" href="/img/titleLogo.jpg" type="image/jpeg">
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
     rel="stylesheet">
-
+     
+     
     <!-- Css Styles -->
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
@@ -27,6 +29,11 @@
     <link rel="stylesheet" href="css/userOtp.css" type="text/css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.min.css">
     
+
+        <!-- Bootstrap CDN -->
+     <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
     <style>
         .dropdown{
@@ -63,7 +70,50 @@
             z-index: 500;
 
         }
+        .offcanvas__nav__option{
+            position: relative;
+             
+        }
+        .offcanvas__nav__option img,.iconsList img{
+            width: 1.5rem;     /* responsive size (about 24px) */
+            height: auto;      /* maintain aspect ratio */
+            display: block;
+            object-fit: contain;
+        }
+        .cart-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+            background-color: red;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 50%;
+            line-height: 1;
+        }
+        .logoImg{
+            max-width:75%;
+            height: auto;
+        }
+    .hidden {
+        display: none !important;
+    }
+    
+        .nav-link {
+    text-decoration: none;
+    padding: 10px;
+    border-bottom: 2px solid transparent; /* invisible line */
+    transition: border-bottom 0.3s ease;
+    }
 
+    .nav-link:hover {
+    border-bottom: 2px solid #000; /* underline on hover */
+    }
+
+    .nav-link.active {
+    border-bottom: 2px solid  #e76800; /* always underline active link */
+    }
     </style>
      
 </head>
@@ -78,23 +128,54 @@
     <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
-            <div class="offcanvas__links">
-                <a href="#">SignIn</a>
-                <a href="#">Login</a>
+            <div class="mt-5  offcanvas__links" >
+                <% if (locals.user) { %>
+                    <div class="dropdown">
+                        <a href="#"> <%=locals.user.name %></a>
+                        <div class="dropdown-content">
+                            <a href="/userProfile">Profile</a>
+                            <a href="/logout">Logout</a>
+
+                        </div>
+                    </div>
+                <% }
+                else { %>
+                    <a href="/login">Login</a>
+                    <a href="/signup">Sign Up</a>
+                     
+                <% } %>
+                 
             </div>
-            <div class="offcanvas__top__hover">
-                <span>Usd <i class="arrow_carrot-down"></i></span>
-                <ul>
-                    <li>USD</li>
-                    <li>EUR</li>
-                    <li>USD</li>
-                </ul>
-            </div>
+             
         </div>
         <div class="offcanvas__nav__option">
-            <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
-            <a href="#"><img src="img/icon/heart.png" alt=""></a>
-            <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
+                <!-- Search Icon -->
+                    <a href="" class="toggle-search">
+                        <img src="/img/icon/searchNew.png" alt="Search">
+                    </a>
+
+                    <!-- Hidden Search Form -->
+                    <form 
+                        action="/filter" 
+                        method="GET" 
+                        id="search-form" 
+                        class="d-flex align-items-center position-absolute hidden" 
+                        style="top: 100%; right: 0;  background: white; padding: 5px; border: 1px solid #ccc; border-radius: 4px;"
+                    >
+                        <input 
+                        type="text" 
+                        name="query" 
+                        placeholder="Search items..." 
+                        class="form-control form-control-sm me-2"
+                        style="max-width: 200px;"
+                        />
+                        <button type="submit" class="btn btn-sm btn-dark">
+                        <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+            <a href="/wishlist-page"><img src="img/icon/heartNew.png" alt=""><span class="cart-badge"><%= locals.wishlistCount %></span></a>
+            <a href="/cart"><img src="img/icon/cartNew.png" alt=""> <span class="cart-badge" id="cart-count"><%=locals.cartCount%></span> </a>
+            
             <div class="price"></div>
         </div>
         <div id="mobile-menu-wrap"></div>
@@ -143,35 +224,55 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-3">
-                    <div class="header__logo">
-                        <a href="./index.html"><img src="img/logo.png" alt=""></a>
+                    <div class="header__logo mt-0">
+                        <a href="/"><img src="img/logoNewpng.png" class="logoImg" alt=""></a>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <nav class="header__menu mobile-menu">
                         <ul>
-                            <li class="active"><a href="/">Home</a></li>
-                            <li><a href="/shop">Shop</a></li>
-                            <!-- <li><a href="#">Pages</a>
-                                <ul class="dropdown">
-                                    <li><a href="./about.html">About Us</a></li>
-                                    <li><a href="./shop-details.html">Shop Details</a></li>
-                                    <li><a href="./shopping-cart.html">Shopping Cart</a></li>
-                                    <li><a href="./checkout.html">Check Out</a></li>
-                                    <li><a href="./blog-details.html">Blog Details</a></li>
-                                </ul>
-                            </li> -->
-                            <!-- <li><a href="./blog.html">Blog</a></li>
-                            <li><a href="./contact.html">Contacts</a></li> -->
+                            <% const currentSelectPage = typeof selectPage !== 'undefined' ? selectPage : ''; %>
+                            <li><a href="/" class="nav-link <%= currentSelectPage === 'home' ? 'active' : '' %>">Home</a></li>
+                            <li><a href="/shop"class="nav-link <%= currentSelectPage=== 'shop' ? 'active' : '' %>">Shop</a></li>
+                            <li><a href="/contact" class="nav-link <%= currentSelectPage === 'contact' ? 'active' : '' %>">Contact</a></li>
+                            <li><a href="/about"class="nav-link <%= currentSelectPage=== 'about' ? 'active' : '' %>">About</a></li>
+                             
                         </ul>
                     </nav>
                 </div>
                 <div class="col-lg-3 col-md-3">
-                    <div class="header__nav__option">
-                        <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
-                        <a href="/wishlist-page"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="/cart"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
+                    
+
+                    <div class="header__nav__option iconsList position-relative">
+                        <!-- Search Icon -->
+                    <a href="" class="toggle-search">
+                        <img src="/img/icon/searchNew.png" alt="Search">
+                    </a>
+
+                    <!-- Hidden Search Form -->
+                    <form 
+                        action="/filter" 
+                        method="GET" 
+                        id="search-form" 
+                        class="d-flex align-items-center position-absolute hidden" 
+                        style="top: 100%; right: 0;  background: white; padding: 5px; border: 1px solid #ccc; border-radius: 4px;"
+                    >
+                        <input 
+                        type="text" 
+                        name="query" 
+                        placeholder="Search items..." 
+                        class="form-control form-control-sm me-2"
+                        style="max-width: 200px;"
+                        />
+                        <button type="submit" class="btn btn-sm btn-dark">
+                        <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                        <a href="/wishlist-page"><img src="img/icon/heartNew.png" alt=""><span class="cart-badge"><%= locals.wishlistCount %></span></a>
+                        <a href="/cart"><img src="img/icon/cartNew.png" alt=""> <span class="cart-badge" id="cart-count"><%= locals.cartCount %></span></a>
                     </div>
+
+
                 </div>
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
