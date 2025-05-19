@@ -1,6 +1,6 @@
 const Product=require('../../models/productSchema')
 const User=require('../../models/userSchema')
-const Order=require('../../models/OrderSchema')
+const Order=require('../../models/orderSchema')
 const Address=require('../../models/addressSchema')
 
 const getOrdersPage=async(req,res)=>{

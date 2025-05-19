@@ -1,4 +1,4 @@
-const Order=require('../../models/OrderSchema')
+const Order=require('../../models/orderSchema')
 const Product=require('../../models/productSchema')
 const moment=require('moment')
 
