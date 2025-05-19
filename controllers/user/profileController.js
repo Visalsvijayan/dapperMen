@@ -1,6 +1,7 @@
 const User=require('../../models/userSchema');
 const Address=require('../../models/addressSchema')
-const Order=require('../../models/orderSchema')
+ 
+
 const nodemailer=require('nodemailer');
 const bcrypt=require('bcrypt');
 const env=require('dotenv').config();
