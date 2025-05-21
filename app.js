@@ -28,7 +28,7 @@ app.use(session({
     }
 } ))
  
-// app.use(nocache());  
+app.use(nocache());  
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -40,10 +40,15 @@ app.use((req, res, next) => {
  
 app.set("view engine","ejs");
 app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')])
-app.use(express.static(path.join(__dirname,'public')))
+// app.use(express.static(path.join(__dirname,'public')))
 app.use(cartCountMiddleware)
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
+//middleware to handle the error routes in admin side
+app.use('/admin/*',(req,res)=>{
+    res.status(404).render('pageerror')
+})
+//middleware to handle the error routes in user side
 app.use('*', (req, res) => {
     res.status(404).render('page-404'); 
 }); 
