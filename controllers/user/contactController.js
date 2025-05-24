@@ -1,11 +1,21 @@
 const env=require('dotenv').config();
 const nodemailer=require('nodemailer')
+const User=require('../../models/userSchema')
 const statusCodes=require('../../config/statusCode')
 const getContactPage=async(req,res)=>{
     try {
+        const user=req.session.user;
+        if(user){
+            let userExist=await User.findOne({_id:user})
+            if(!userExist|| userExist.isBlocked){
+                req.session.destroy();
+                res.redirect('/login')
+            }
+        }
         res.render('contactPage',{selectPage:'contact'})
     } catch (error) {
-        res.status(statusCodes.INTERNAL_SERVER_ERROR).send("Something went wrong while loading the contact page.");
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).redirect('/pageNotFound');
+        
     }
 }
 
@@ -19,6 +29,7 @@ const transporter=nodemailer.createTransport({
 
 const contactMessageSend=async(req,res)=>{
     const{name,email,subject,message}=req.body
+    
     //mail to admin
     const adminMail={
         from:email,
@@ -44,11 +55,19 @@ const contactMessageSend=async(req,res)=>{
     }
 }
 
-const aboutPage=(req,res)=>{
+const aboutPage=async(req,res)=>{
     try {
+        const user=req.session.user;
+        if(user){
+            let userExist=await User.findOne({_id:user})
+            if(!userExist|| userExist.isBlocked){
+                req.session.destroy();
+                res.redirect('/login')
+            }
+        }
         res.render('about',{selectPage:'about'})
     } catch (error) {
-        res.status(statusCodes.INTERNAL_SERVER_ERROR).send("Something went wrong while loading the contact page.");
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).redirect('/pageNotFound');
     }
 }
 

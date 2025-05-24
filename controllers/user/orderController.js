@@ -20,6 +20,7 @@ const getCheckoutPage=async(req,res)=>{
         const addressData=await Address.findOne({userId:user})
         // const couponData=await Coupon.find({isActive:true})
          const oid=new mongoose.Types.ObjectId(user)
+
   
         const data=await User.aggregate([
             {$match:{_id:oid}},
@@ -54,7 +55,8 @@ const getCheckoutPage=async(req,res)=>{
             }}
              
         ])
-
+         
+         
         //coupons passing to checkout page
 
         const allCoupons = await Coupon.find({ isActive: true });
@@ -105,6 +107,30 @@ const getCheckoutPage=async(req,res)=>{
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).redirect('/pageNotFound')
         
     }
+}
+const validateStockToCheckout=async(req,res)=>{
+  try {
+    const user=req.session.user;
+    const cart=await Cart.find({userId:user}).populate('items.productId')
+    const insufficientStock=[]
+    for(const item of cart[0].items){
+      if(item.productId.quantity<item.quantity){
+        insufficientStock.push(item.productId.productName)
+      }
+    }
+    if(insufficientStock.length>0){
+      return res.status(400).json({
+        success: false,
+        message: 'product have no enough stock,check the current stock'
+      });
+    }
+    res.status(200).json({success:'true'})
+  } catch (error) {
+     res.status(500).json({
+      status: 'error',
+      message: 'Internal server error while checking stock'
+    });
+  }
 }
 const deleteProduct=async(req,res)=>{
     try {
@@ -225,12 +251,7 @@ async function prepareOrderData(req){
       couponName
        
   });
-  //reduce stock
-  for(let item of newOrder.orderItems ){
-      await Product.findByIdAndUpdate(item.product,{
-          $inc:{quantity:-item.quantity}
-      })
-  }
+  
 
   // return {newOrder,finalAmount,userId,walletAmount}
   return { 
@@ -246,7 +267,13 @@ const placeOrderCOD=async(req,res)=>{
   try {
   
     const {newOrder,finalAmount,userId}=await prepareOrderData(req)
- 
+
+    //reduce stock
+    for(let item of newOrder.orderItems ){
+        await Product.findByIdAndUpdate(item.product,{
+            $inc:{quantity:-item.quantity}
+        })
+    }
     
     const orderDone = await newOrder.save();
     await User.findByIdAndUpdate(userId, {
@@ -277,6 +304,12 @@ const placeOrderWallet=async(req,res)=>{
           success: false,
           message: "Insufficient wallet balance"
         });
+    }
+    //reduce stock
+    for(let item of newOrder.orderItems ){
+        await Product.findByIdAndUpdate(item.product,{
+            $inc:{quantity:-item.quantity}
+        })
     }
     const orderDone=await newOrder.save();  //order saved
     await User.findByIdAndUpdate(userId,{      //updating user
@@ -320,6 +353,7 @@ const placeOrderRazorpay=async(req,res)=>{
       key_id:process.env.RAZORPAY_KEY_ID,
       amount:options.amount,
       orderData:newOrder,
+       
       razorpayOrder
     })
     
@@ -341,6 +375,7 @@ const verifyPayment = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       orderData, //  orderData from frontend
+      
     } = req.body;
     
 
@@ -409,14 +444,15 @@ const verifyPayment = async (req, res) => {
 
       return res.status(StatusCodes.SUCCESS).json({ success: true, orderId: savedOrder.orderId });
     } else {
-      res.json({ success: false });
+       
+      return res.status(StatusCodes.BAD_REQUEST).json({ success:false});
     }
   } catch (error) {
     console.error("Error in verifyPayment:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 };
-
+ 
 const applyCoupon=async(req,res)=>{
   try {
     const couponName=req.body.couponName;
@@ -778,6 +814,7 @@ const editAddressModal = async (req, res) => {
   
 module.exports={
     getCheckoutPage,
+    validateStockToCheckout,
     deleteProduct,
     placeOrderCOD,
     placeOrderWallet,

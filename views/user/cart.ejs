@@ -163,7 +163,7 @@
  
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-      document.getElementById("checkoutBtn").addEventListener("click", function (event) {
+      document.getElementById("checkoutBtn").addEventListener("click", async function (event) {
         const cartLength = parseInt(this.getAttribute("data-length"));
 
         if (cartLength === 0) {
@@ -176,6 +176,33 @@
                 showConfirmButton:false
             })
         }
+        event.preventDefault();
+        try {
+            const checkQty=await fetch('/checkout/validate-stock')
+            const result=await checkQty.json()
+            if(result.success){
+                window.location.href='/checkout?userId=<%= user._id %>'
+            }
+            else{
+                Swal.fire({
+                    icon:'error',
+                    title:'Stock error',
+                    text:`${result.message}`,
+                     timer: 2000,
+                     showConfirmButton: false
+                })
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: 'Could not check stock. Please try again later.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+        }
+
         
     });
 

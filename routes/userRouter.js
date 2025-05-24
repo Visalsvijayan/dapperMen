@@ -67,6 +67,7 @@ router.post('/changeQuantity',userAuth,cartController.changeQuantity)
 router.delete('/remove-Cart-Item',userAuth,cartController.removeCartItem)
 //ordermanagement
 router.get('/checkout',userAuth,orderController.getCheckoutPage)
+router.get('/checkout/validate-stock',orderController.validateStockToCheckout)
   
 router.get('/getAddress',userAuth,orderController.getAddress)
 router.post('/addAddressModal',userAuth,orderController.postAddAddressModal)

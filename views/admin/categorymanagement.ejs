@@ -229,7 +229,14 @@
             displayErrorMessage("description-error", "Please enter a description");
             isValid = false;
         }
-
+        if(!/^[a-zA-Z0-9\s.,'-]+$/.test(description)){
+             displayErrorMessage("description-error", "invalid characters");
+            isValid=false;
+        }
+        if(!/[a-zA-Z0-9]/.test(description)){
+             displayErrorMessage("description-error", "Must include the alphabetic charecters");
+            isValid=false;    
+        }
         return isValid;
     }
 

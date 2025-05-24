@@ -64,6 +64,7 @@
               <input
                 type="text"
                 name="name"
+                id="brandName"
                 placeholder="Type here"
                 class="form-control"
               />
@@ -71,7 +72,7 @@
             <label for="product_name" class="form-label">Brand Image</label>
             <div class="input-upload">
               <img src="" alt=""/>
-              <input id="imgFileInput"  class="form-control border" name="image" type="file" />
+              <input id="imgFileInput"  class="form-control border" name="image" type="file" accept=".jpg, .jpeg, .png" />
             </div>
             <div class="d-grid">
               <button class="btn btn-primary mt-20" type="submit">
@@ -181,8 +182,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    function confirmDelete(event, link) {
+ 
+   
+  function confirmDelete(event, link) {
     event.preventDefault(); // Prevent default link navigation immediately
 
     Swal.fire({
@@ -200,8 +204,13 @@
     });
   }
  function validateForm(event){
+  const name=document.getElementById('brandName').value.trim();
   const imgInput=document.getElementById('imgFileInput').value
+  const imgFile=document.getElementById('imgFileInput').files[0]
+  const validFileType=['image/jpeg', 'image/png', 'image/jpg'];
   const input= imgInput? imgInput:''
+  const brandNames = JSON.parse('<%- JSON.stringify(brandNames) %>')
+  const isDuplicate=brandNames.some(brand=>brand.toLowerCase()===name.toLowerCase())
   if(!input){
     event.preventDefault();
     Swal.fire({
@@ -210,6 +219,35 @@
       text:'Please select a Brand Image'
     })
     return false
+  }
+  if(!validFileType.includes(imgFile.type)){
+    event.preventDefault();
+    Swal.fire({
+      icon:'error',
+      title:'Input type error',
+      text:'Input must be jpg/png/jpeg'
+    })
+    return false;
+  }
+  if(!name){
+     event.preventDefault();
+    Swal.fire({
+      icon:'error',
+      title:'Name Input Empty',
+      text:'Please enter the name'
+    })
+    return false;
+
+  }
+  if(isDuplicate){
+      event.preventDefault();
+    Swal.fire({
+      icon:'error',
+      title:'Brand Name already exist',
+      text:'Please enter another brand'
+    })
+    return false;
+
   }
   return true
  }

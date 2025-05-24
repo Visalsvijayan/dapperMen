@@ -60,7 +60,8 @@ const postCouponDetails = async (req, res) => {
         // If no couponId, create new coupon
         else {
             
-            const isExist = await Coupon.findOne({ name: couponName });
+             
+            const isExist = await Coupon.findOne({ name: { $regex: new RegExp(`^${couponName}$`, 'i') } });
             if (isExist) {
                 return res.json({ success: false, msg: "Coupon with same name already exists" });
             }

@@ -12,6 +12,7 @@ const statusCode=require('../../config/statusCode')
 const loadHomepage=async(req,res)=>{
     try {
       const user=req.session.user;
+
       const categories=await Category.find({isListed:true})
       let productData=await Product.find(
         {isBlocked:false,
@@ -25,8 +26,15 @@ const loadHomepage=async(req,res)=>{
 
       if(user){
              
-            const userData=await User.findOne({_id:user._id,isAdmin:false})
-            return res.render('home',{user:userData,products:productData})
+            let userData=await User.findOne({_id:user._id,isAdmin:false})
+
+            if(!userData||userData.isBlocked){
+                 req.session.destroy(); // Remove session
+                 userData = null;
+                 res.redirect('/login')
+            }
+
+            return res.render('home',{user:userData,products:productData,session:req.session})
             
         }
         else{
@@ -36,12 +44,12 @@ const loadHomepage=async(req,res)=>{
         }
         
     } catch (error) {
-        console.log('home page is not found')
+        console.log('home page is not found',error)
         res.status(statusCode.INTERNAL_SERVER_ERROR).send('server error')
         
     }
 }
-
+ 
 const pageNotFound=async (req,res)=>{
     try {
         res.status(statusCode.NOT_FOUND).render("page-404")
@@ -293,6 +301,7 @@ module.exports={loadHomepage,
     verifyOtp,
     login,
     logout,
+
     
      
     

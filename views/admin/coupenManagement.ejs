@@ -138,8 +138,8 @@
           <div class="modal-body">
             <div class="mb-3">
               <label for="couponCode" class="form-label">Coupon Code</label>
-              <input type="text" class="form-control" id="couponCode" name="code" required>
-               
+              <input type="text" class="form-control" id="couponCode" name="code" >
+              <div id="couponCodeError" class="text-danger small"></div>
             </div>
   
             <div class="mb-3">
@@ -221,6 +221,7 @@
       document.getElementById('startDateError').textContent='';
       document.getElementById('expiryDateError').textContent='';
       document.getElementById('minimumError').textContent='';
+      document.getElementById('couponCodeError').textContent='';
 
 
       let hasError=false;
@@ -235,8 +236,12 @@
       const expiryDate = new Date(document.getElementById('expiryDate').value);
       const couponCode=document.getElementById('couponCode').value
       const discountType=document.getElementById('discountType').value;
+    
 
-
+      if(couponCode.trim()==='' ||!/[a-zA-Z]/.test(couponCode)){
+        document.getElementById('couponCodeError').textContent="Coupon code is necessery and must have alphabetic characters";
+        hasError=true;  
+      }
       if(isNaN(discountValue)||discountValue<=0){
         document.getElementById('discountValueError').textContent="discount value must be greater than 0";
         hasError=true;

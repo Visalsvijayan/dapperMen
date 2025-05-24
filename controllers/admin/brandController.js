@@ -7,6 +7,9 @@ const getBrandPage=async(req,res)=>{
         const limit=3;
         const skip=(page-1)*limit;
         const brandData=await Brand.find({}).sort({createdAt:-1}).skip(skip).limit(limit);
+        const allBrand=await Brand.find({},{brandName:1,_id:0})
+        const brandNames=allBrand.map(brand=>brand.brandName)
+        
         const totalBrands=await Brand.countDocuments();
         
         const totalPages=Math.ceil(totalBrands/limit);
@@ -16,7 +19,8 @@ const getBrandPage=async(req,res)=>{
             data:brandData,
             totalPages:totalPages,
             totalBrands:totalBrands,
-            currentPage:page
+            currentPage:page,
+            brandNames
 
 
         })

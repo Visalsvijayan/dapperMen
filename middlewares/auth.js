@@ -6,6 +6,12 @@ const userAuth=(req,res,next)=>{
             if(data&&!data.isBlocked){
                 next();
             }
+            else if(data&&data.isBlocked){
+                req.session.destroy(()=>{
+                 return res.redirect('/')
+                })
+
+            }
             else{
                 res.redirect('/login')
                 next()
@@ -43,8 +49,7 @@ const adminAuth=(req,res,next)=>{
     }
    
 }
-
-
+ 
 module.exports={
     userAuth,
     adminAuth

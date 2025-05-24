@@ -466,8 +466,21 @@
         let amountText = document.getElementById('finalAmount').innerText;        
         const walletAmount=parseInt('<%= user.wallet.balance %>');
         let finalAmount = parseInt(amountText.replace('₹', '').trim());
- 
-        
+        // the stock checking 
+        const checkQty=await fetch('/checkout/validate-stock') 
+        const result=await checkQty.json()
+        if(!result.success){
+            
+             Swal.fire({
+                    icon:'error',
+                    title:'Stock error',
+                    text:`${result.message}`,
+                    timer: 2000,
+                    showConfirmButton: false
+            })
+            return
+                 
+        }
         if (!payment) {
             Swal.fire({
                 title: 'NO PAYMENT FOUND!',
@@ -536,16 +549,13 @@
                             response.key_id,
                             {
                                 totalPrice:totalPrice,
- 
-                                
                                 createdOn: new Date().getTime(),
                                 date: new Date(),
                                 address: address,
                                 payment: payment,
                                 discount: discount,
                                 finalAmount,
-                                
-                                
+                                                               
                             }
                         );
                     }else {
@@ -593,8 +603,9 @@
     }
   }
                 
-         
+  let rzp;      
   function initiateRazorpay(amount, razorpayOrder, orderId, key_id, orderData) {
+    
     const options = {
         key: key_id,
         amount: amount,
@@ -602,7 +613,8 @@
         name: "dapperMen",
         description: "Thank you for shopping",
         order_id: razorpayOrder.id,
-        handler: function (response) {
+        handler:async function (response) {
+               
             fetch("/verify-payment", {
                 method: "POST",
                 headers: {
@@ -613,6 +625,7 @@
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_signature: response.razorpay_signature,
                     orderData: orderData 
+                    
                 })
             })
             .then(res => res.json())
@@ -627,16 +640,105 @@
                         window.location.href = `/place-order-success?orderId=${data.orderId}`;
                     });
                 } else {
-                    Swal.fire('Error', 'Payment verification failed', 'error');
+                    //   if (rzp) rzp.close(); // now accessible
+                    Swal.fire({
+                        icon:'error',
+                        title:'payment error',
+                        text:'payment not done'
+                    })
+                     
                 }
             });
+        },
+         // FAILURE or dismiss handler
+        modal: {
+            ondismiss: function () {
+                Swal.fire({
+                    title: 'Payment Failed or Cancelled',
+                    text: 'You cancelled the payment or it failed.',
+                    icon: 'error'
+                })
+            }
+        },
+        // Disabling retry
+        retry: {
+            enabled: false
+        },
+
+        theme: {
+            color: "#3399cc",
+            hide_topbar: true
         }
+
     };
 
-    const rzp = new Razorpay(options);
+    rzp = new Razorpay(options);
     rzp.open();
+     
+    
 }
+// function initiateRazorpay(amount, razorpayOrder, orderId, key_id, orderData) {
+//   const options = {
+//     key: key_id,
+//     amount: amount,
+//     currency: "INR",
+//     name: "dapperMen",
+//     description: "Thank you for shopping",
+//     order_id: razorpayOrder.id,
+//     handler: async function (response) {
+//       const res = await fetch("/verify-payment", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           razorpay_order_id: response.razorpay_order_id,
+//           razorpay_payment_id: response.razorpay_payment_id,
+//           razorpay_signature: response.razorpay_signature,
+//           orderData: orderData
+//         })
+//       });
+//       const data = await res.json();
+//       if (data.success) {
+//         Swal.fire({
+//           title: 'Payment Successful!',
+//           text: 'Your order has been placed.',
+//           icon: 'success'
+//         }).then(() => {
+//           window.location.href = `/place-order-success?orderId=${data.orderId}`;
+//         });
+//       } else {
+//         Swal.fire({
+//           icon: 'error',
+//           title: 'Payment Error',
+//           text: 'Payment verification failed'
+//         });
+//       }
+//     },
+//     modal: {
+//       ondismiss: function () {
+//         Swal.fire({
+//           title: 'Payment Cancelled',
+//           text: 'You closed the Razorpay window.',
+//           icon: 'info'
+//         });
+//       }
+//     },
+//     //  Disabling retry
+//     retry: {
+//       enabled: false
+//     },
 
+//     theme: {
+//       color: "#3399cc",
+//       hide_topbar: true
+//     }
+
+//   };
+
+//   const rzp = new Razorpay(options);
+//   rzp.open();
+// }
+
+ 
 // to apply coupon
 document.getElementById('applyButton').addEventListener('click', async function () {
     const couponName = document.getElementById('couponSelect').value;

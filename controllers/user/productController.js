@@ -10,7 +10,16 @@ const loadShoppingPage = async(req, res) => {
     try {
         
         const user = req.session.user;
-        const userData = await User.findOne({_id: user});
+        let userData
+        if(user){
+            let userExist=await User.findOne({_id:user})
+            if(!userExist||userExist.isBlocked){
+                userData=null;
+                res.redirect('/login')
+            }
+
+        }
+        userData = await User.findOne({_id: user});
         const categories = await Category.find({isListed: true});
         const categoryIds=categories.map((category)=>new mongoose.Types.ObjectId(category._id))
         const brandss=await Brand.find({isBlocked:false})
