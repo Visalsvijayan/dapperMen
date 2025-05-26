@@ -8,6 +8,7 @@ const orderController=require('../controllers/user/orderController')
 const wishlistController=require('../controllers/user/wishlistController')
 const walletController=require('../controllers/user/walletController')
 const contactController=require('../controllers/user/contactController')
+const retryPayementController=require('../controllers/user/retryPaymentController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
 
@@ -99,4 +100,11 @@ router.post('/coupon/applyCoupon',userAuth,orderController.applyCoupon)
 router.get('/contact',contactController.getContactPage)
 router.post('/contact',contactController.contactMessageSend)
 router.get('/about',contactController.aboutPage)
+//retryPayment 
+router.get('/retryPayment/validate-stock/:orderId',userAuth,retryPayementController.validateStock)
+router.patch('/retryPayment/wallet/:orderId',userAuth,retryPayementController.walletPayment)
+router.patch('/retryPayment/cod/:orderId',userAuth,retryPayementController.cashOnDelivery)
+router.get('/retryPayment/razorpay/:orderId',userAuth,retryPayementController.razorpayPayment)
+router.patch('/retryPayment/verify-razorpay/:orderId',userAuth,retryPayementController.verifyRazorpay)
+ 
 module.exports=router;

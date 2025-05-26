@@ -456,8 +456,9 @@ a{
                              <div class="text-danger fw-bold mt-1"><strong>Cancelled</strong></div>
                           <%}else if(orders.status==='Reject Return Request'){%>
                              <div class="text-danger fw-bold mt-1"><strong>Reject return request</strong></div>
-                          <%}%>   
-
+                          <%}else if(orders.status==='Payment Pending'){%>
+                            <div class="text-danger fw-bold mt-1"> <strong>Order Incomplete. Make Your Payment</strong> </div>   
+                         <%}%> 
                             
 
                         </div>
@@ -597,12 +598,27 @@ a{
         <%if(orders.status==='Delivered'){%>
             <button id="return-Product" class="btn btn-primary"><i class="fas fa-undo"></i>RETURN PRODUCT</button>
         <%}%>
+        <%if(orders.status==='Payment Pending'){%>
+            <button id="retryPaymentBtn" class="btn btn-primary" onclick="retryPayment('<%=orders._id%>')"><i class="fas fa-undo"></i>Retry Payment</button>
+        <%}%>
+        
+    </div>
+    <!-- Hidden section: radio buttons + proceed button -->
+    <div id="paymentOptions" style="display: none; margin-top: 10px;">
+    <p>Select a payment method:</p>
+    
+    <label><input type="radio" name="paymentMethod" value="wallet"> Wallet</label><br>
+    <label><input type="radio" name="paymentMethod" value="razorpay"> Razorpay</label><br>
+    <label><input type="radio" name="paymentMethod" value="cod"> Cash on Delivery</label><br>
+
+    <button id="proceedPaymentBtn" class="btn btn-success" style="margin-top: 10px;">Proceed</button>
     </div>
    
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -796,7 +812,218 @@ function cancelSingleProduct(orderId,productId,event){
 
 
 }
+//retry payment function
+ function retryPayment(orderId){
 
+    document.getElementById("retryPaymentBtn").addEventListener("click", function () {
+    document.getElementById("paymentOptions").style.display = "block";
+     // Handle Proceed button click
+  document.getElementById("proceedPaymentBtn").addEventListener("click",async function () {
+    
+    const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked');
+
+    if (!selectedMethod) {
+      alert("Please select a payment method.");
+      return;
+    }
+
+    const method = selectedMethod.value;
+
+    //  handle based on selected method
+    if (method === "wallet") {
+      
+        try {
+            const res = await fetch(`/retryPayment/wallet/${orderId}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          });
+          const data = await res.json();
+          if (data.success) {
+            Swal.fire("Success", "Wallet payment successful!", "success")
+              .then(() => window.location.reload());
+          } else {
+            Swal.fire("Error", data.message || "Wallet payment failed", "error");
+          }
+        } catch (err) {
+          console.error("Wallet retry error:", err);
+          res.redirect('/pageNotFound')
+        }
+
+    } else if (method === "razorpay") {
+      // trigger razorpay flow
+      try {
+        const res=await fetch(`/retryPayment/razorpay/${orderId}`,{
+            method:'GET',
+            headers:{
+                "Content-Type":"application/json"
+            }
+        })
+        const data=await res.json();
+        if(data.success){
+            
+             initiateRazorpay(
+                data.amount,
+                data.razorpayOrder,
+                data.orderId,
+                data.key_id,
+                data.orderIdViewOrder
+                             
+            );
+
+        }
+        else{
+            
+            Swal.fire({
+                icon:'error',
+                text:'Error in Creating razorpay instance',
+                title:data.message
+            });
+        }
+        
+      } catch (error) {
+        console.error("Error in Razorpay initiation:", error);
+        
+         
+      }
+       
+    } else if (method === "cod") {
+       try {
+        const res=await fetch(`/retryPayment/cod/${orderId}`,{
+            method:'PATCH',
+            headers:{
+                "Content-Type":"application/json"
+            }
+        });
+        const data=await res.json();
+        if(data.success){
+            Swal.fire("Success", "Order with Cash On Delivery Successful!", "success")
+            .then(() => window.location.reload()); 
+        }
+        else {
+            Swal.fire("Error", data.message || "Cash on delivery payment failed", "error");
+        }
+       } catch (error) {
+            console.error("Cod retry error:", err);
+            res.redirect('/pageNotFound')
+       }
+       
+    }
+  });
+  });
+}
+
+//initialize razorpay
+ 
+function initiateRazorpay(amount, razorpayOrder, orderId, key_id, orderIdViewOrder) {
+    const options = {
+        key: key_id,
+        amount: amount,
+        currency: "INR",
+        name: "dapperMen",
+        description: "Thank you for shopping",
+        order_id: razorpayOrder.id,
+        handler: async function (response) {
+            try {
+                const res = await fetch(`/retryPayment/verify-razorpay/${orderId}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Payment Successful!',
+                        text: 'Your order has been completed.',
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.reload();
+                        // window.location.href = `/place-order-success?orderId=${data.orderId}`;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Error',
+                        text: 'Payment not done'
+                    });
+                }
+            } catch (err) {
+                console.error("Error verifying payment", err);
+            }
+        },
+
+        modal: {
+            // Simply allow user to close the modal; don't call showFailure here
+            ondismiss: function () {
+                console.log("Payment modal closed by user");
+            }
+        },
+
+        retry: {
+            enabled: false
+        },
+
+        theme: {
+            color: "#3399cc",
+            hide_topbar: true
+        }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+    rzp.on("payment.failed", function (response) {
+        const error = response.error;
+        showFailure(
+            error.description || "Payment failed",
+            error.code
+        );
+    });
+
+    function showFailure(message, errorCode) {
+        Swal.fire({
+            title: "Payment Failed",
+            html: `
+                <p>${message}</p>
+                ${errorCode ? `<small>Error code: ${errorCode}</small>` : ''}
+            `,
+            icon: "error",
+            showCancelButton: true,
+            confirmButtonText: "Retry Payment",
+            cancelButtonText: "View Order",
+            allowOutsideClick: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/retryPayment/validate-stock/${orderId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            initiateRazorpay(amount, razorpayOrder, orderId, key_id, orderIdViewOrder);
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Stock Issue',
+                                text: `${data.message}`
+                            }).then(() => {
+                                window.location.href = `/order-Details?orderId=${orderIdViewOrder}`;
+                            });
+                        }
+                    });
+            } else {
+                window.location.href = `/order-Details?orderId=${orderIdViewOrder}`;
+            }
+        });
+    }
+}
+
+ 
 
 </script>
 <%- include("../../views/partials/user/footer") %>

@@ -129,25 +129,29 @@ const UpdateOrderStatus=async(req,res)=>{
 const approveReturnOrder=async(req,res)=>{
     try {
         const {orderId}=req.params;
+        let finalAmount=0;
         const orders=await Order.findById(orderId).populate('orderItems.product')
         const payment=orders.payment;
         for(let item of orders.orderItems){
-          const productId=item.product._id;
-          const qty=item.quantity;
-          await Product.findByIdAndUpdate(productId, {
-            $inc: { quantity: qty }
-          });
+          if(item.productStatus!=='Cancelled'){
+            const productId=item.product._id;
+            const qty=item.quantity;
+            await Product.findByIdAndUpdate(productId, {
+              $inc: { quantity: qty }
+            });
+            finalAmount+=item.price * item.quantity
+          }
         }
 
         await Order.findByIdAndUpdate(orderId, { status: 'Returned' });
-        if(payment==='wallet'){
-          await User.findByIdAndUpdate(req.session.user._id,{
-            $inc:{"wallet.balance":orders.finalAmount},
+        if(payment==='wallet' || payment==='cod' || payment==='razorpay'){
+          await User.findByIdAndUpdate(orders.userId,{
+            $inc:{"wallet.balance":finalAmount},
             $push:{
               "wallet.transactions":{
                 date:new Date(),
                 status:'Credited',
-                amount:orders.finalAmount
+                amount:finalAmount
               }
             }
           })

@@ -118,26 +118,44 @@ const getResetPassPage=async(req,res)=>{
     }
 }
 
-const resendOtp=async(req,res)=>{
-  
-    try{
-       
-        const otp=generateOtp();
-        
-        req.session.userOtp=otp;
-        const email=req.session.email;
-      
-        const emailSent=await sendVerificationEmail(email,otp);
-        if(emailSent){
-            console.log('Resend OTP: ',otp);
-            res.status(200).json({success:true,msg:"Resend OTP successful"})
+ 
+const resendOtp = async (req, res) => {
+    try {
+        const otp = generateOtp();
+        const email = req.session.email;
+
+        req.session.userOtp = otp;
+
+        const emailSent = await sendVerificationEmail(email, otp);
+        if (emailSent) {
+            console.log('Resend OTP: ', otp);
+
+            // Set OTP to expire in 1 minute
+            setTimeout(() => {
+                req.sessionStore.get(req.sessionID, (err, session) => {
+                    if (!err && session && session.userOtp) {
+                        delete session.userOtp;
+
+                        req.sessionStore.set(req.sessionID, session, (err) => {
+                            if (err) {
+                                console.error('Error saving session after resending OTP:', err);
+                            } else {
+                                console.log('Resent OTP expired and removed from session');
+                            }
+                        });
+                    }
+                });
+            }, 60 * 1000); // 1 minute
+
+            return res.status(200).json({ success: true, msg: "Resend OTP successful" });
+        } else {
+            return res.status(500).json({ success: false, msg: "Failed to send OTP" });
         }
-    }catch (error){
-        console.error("Error in resending otp",error)
-        res.status(500).json({success:false,msg:'Internal server error'})
-        
+    } catch (error) {
+        console.error("Error in resending otp", error);
+        return res.status(500).json({ success: false, msg: 'Internal server error' });
     }
-}
+};
 
 const postNewPassword=async(req,res)=>{
     try {
@@ -263,6 +281,25 @@ const changeEmail=async (req,res)=>{
                 req.session.userOtp=otp;
                 req.session.userData=req.body;
                 req.session.email=email;
+                                
+                setTimeout(() => {
+                    req.sessionStore.get(req.sessionID, (err, session) => {
+                        if (!err && session && session.userOtp) {
+                            delete session.userOtp;
+
+                            req.sessionStore.set(req.sessionID, session, (err) => {
+                                if (err) {
+                                    console.error('Error saving updated session after OTP expiry:', err);
+                                } else {
+                                    console.log('OTP removed from session after 1 minute');
+                                }
+                            });
+                        }
+                    });
+                }, 60 * 1000);
+
+
+
                 res.render('profileEmailChangeOtp')
                 console.log('Email sent:',email);
                 console.log('OTP:', otp)

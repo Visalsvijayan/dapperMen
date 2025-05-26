@@ -7,6 +7,8 @@ const env=require('dotenv').config();
 const session=require('express-session')
 const connectDB=require('./config/db');
 const cartCountMiddleware=require('./middlewares/cartCount')
+const MongoStore = require('connect-mongo');
+
  
 
 const passport=require('./config/passport')
@@ -17,16 +19,32 @@ connectDB();
  
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+// app.use(session({
+//     secret:process.env.SESSION_SECRET,
+//     resave:false,
+//     saveUninitialized:true,
+//     cookie:{
+//         secure:false,
+//         httpOnly:true,
+//         maxAge:24*60*1000
+//     }
+// } ))
 app.use(session({
-    secret:process.env.SESSION_SECRET,
-    resave:false,
-    saveUninitialized:true,
-    cookie:{
-        secure:false,
-        httpOnly:true,
-        maxAge:24*60*1000
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,  
+        ttl: 14 * 24 * 60 * 60 
+    }),
+    cookie: {
+        secure: false,
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 1 day (in ms)
     }
-} ))
+}));
+
+
  
 app.use(nocache());  
 app.use(passport.initialize())
