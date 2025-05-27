@@ -567,13 +567,14 @@ const cancelOrder=async(req,res)=>{
             {new:true}
         )
         //updating user if payment is wallet
-        const totalAmount = order.orderItems.reduce((acc, product) => {
+        const deliveryCharge=50;
+        let totalAmount = order.orderItems.reduce((acc, product) => {
           if (product.productStatus !== 'Cancelled') {
             return acc + (product.price * product.quantity);
           }
           return acc;
         }, 0);
-
+        totalAmount=totalAmount+deliveryCharge; 
          if(order.payment === 'wallet' || order.payment === 'razorpay'){
           await User.findByIdAndUpdate(req.session.user._id,{
             $inc:{"wallet.balance":totalAmount},
@@ -598,6 +599,7 @@ const cancelSingleProduct=async(req,res)=>{
   try {
     const{orderId,productId}=req.params;
     const userId=req.session.user;
+    const deliveryCharge=50;
     const order=await Order.findById(orderId).populate('orderItems.product')
      
     if(!order){
@@ -638,7 +640,8 @@ const cancelSingleProduct=async(req,res)=>{
           'wallet.transactions': {
             date: new Date(),
             status: 'Credited',
-            amount: cancelAmount,
+            // amount: cancelAmount,
+            amount:allCancelled ? cancelAmount+deliveryCharge :cancelAmount
           },
         },
       });
