@@ -597,7 +597,7 @@
                 
   let rzp;      
   function initiateRazorpay(amount, razorpayOrder, orderId, key_id,orderIdViewOrder) {
-    
+    let failureHandled=false;
     const options = {
         key: key_id,
         amount: amount,
@@ -645,9 +645,10 @@
          // FAILURE or dismiss handler
          modal: {
             ondismiss: function () {
-                showFailure(
-                    "You closed the payment window before completing the transaction."
-                );
+                if(!failureHandled){
+                    failureHandled=true;
+                    showFailure("You closed the payment window before completing the transaction.")
+                }
             }
         },
 
@@ -668,10 +669,13 @@
     rzp.open();
     rzp.on("payment.failed", function(response) {
         const error = response.error;
-        showFailure(
-            error.description || "Payment failed", 
-            error.code // Optional: pass error code
-        );
+        if(!failureHandled){
+            failureHandled=true;
+            showFailure(
+                error.description || "Payment failed", 
+                error.code // Optional: pass error code
+            );
+        }    
   });
    // Shared failure handler
   function showFailure(message, errorCode) {
